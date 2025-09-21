@@ -11,6 +11,7 @@ import structlog
 
 from app.core.config import settings
 from app.core.database import engine, Base
+from app.core.openapi import custom_openapi
 from app.api.v1 import auth, subscriptions, trading, dashboard
 from app.middleware.auth import AuthMiddleware
 from app.middleware.logging import LoggingMiddleware
@@ -25,6 +26,7 @@ app = FastAPI(
     version="2.0.0",
     docs_url="/docs" if settings.ENVIRONMENT != "production" else None,
     redoc_url="/redoc" if settings.ENVIRONMENT != "production" else None,
+    openapi_url="/openapi.json" if settings.ENVIRONMENT != "production" else None,
 )
 
 # 미들웨어 설정
