@@ -12,7 +12,7 @@ import structlog
 from app.core.config import settings
 from app.core.database import engine, Base
 from app.core.openapi import custom_openapi
-from app.api.v1 import auth, subscriptions, trading, dashboard
+from app.api.v1 import auth, subscriptions, trading, dashboard, ai
 from app.middleware.auth import AuthMiddleware
 from app.middleware.logging import LoggingMiddleware
 
@@ -79,6 +79,7 @@ app.include_router(auth.router, prefix="/api/v1/auth", tags=["authentication"])
 app.include_router(subscriptions.router, prefix="/api/v1/subscriptions", tags=["subscriptions"])
 app.include_router(trading.router, prefix="/api/v1/trading", tags=["trading"])
 app.include_router(dashboard.router, prefix="/api/v1/dashboard", tags=["dashboard"])
+app.include_router(ai.router, prefix="/api/v1/ai", tags=["ai"])
 
 # 전역 예외 처리
 @app.exception_handler(HTTPException)
