@@ -100,14 +100,28 @@ jobs:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
     
-    - name: Build and push Docker image
+    - name: Build and push development image
       uses: docker/build-push-action@v5
       with:
         context: ./backend
+        file: ./backend/Dockerfile.dev
+        push: true
+        tags: |
+          crypto-trading/backend:dev
+          crypto-trading/backend:dev-${{ github.sha }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+    
+    - name: Build and push production image
+      if: github.ref == 'refs/heads/main'
+      uses: docker/build-push-action@v5
+      with:
+        context: ./backend
+        file: ./backend/Dockerfile.prod
         push: true
         tags: |
           crypto-trading/backend:latest
-          crypto-trading/backend:${{ github.sha }}
+          crypto-trading/backend:prod-${{ github.sha }}
         cache-from: type=gha
         cache-to: type=gha,mode=max
 
