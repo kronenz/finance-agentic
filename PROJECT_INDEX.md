@@ -8,7 +8,7 @@
 
 ## 프로젝트 구조
 
-### 📁 소스 코드 (`src/`)
+### 📁 Phase 1 소스 코드 (`src/`)
 ```
 src/
 ├── core/                    # 핵심 유틸리티
@@ -25,10 +25,53 @@ src/
 └── main.py                 # 메인 실행 파일
 ```
 
+### 📁 Phase 2 백엔드 (`backend/`) - 신규
+```
+backend/
+├── app/                     # FastAPI 애플리케이션
+│   ├── core/               # 핵심 모듈
+│   │   ├── config.py       # 설정 관리
+│   │   └── database.py     # 데이터베이스 연결
+│   ├── models/             # 데이터베이스 모델
+│   │   ├── user.py         # 사용자 모델
+│   │   └── subscription.py # 구독 모델
+│   ├── api/                # API 엔드포인트
+│   │   └── v1/             # API v1
+│   │       └── auth.py     # 인증 API
+│   ├── services/           # 비즈니스 로직
+│   └── main.py             # FastAPI 메인 앱
+└── requirements.txt        # Python 의존성
+```
+
+### 📁 Phase 2 프론트엔드 (`frontend/`) - 신규
+```
+frontend/
+├── src/                     # React 소스 코드
+│   ├── components/         # React 컴포넌트
+│   ├── services/           # API 서비스
+│   │   ├── api.ts          # API 클라이언트
+│   │   └── auth.ts         # 인증 서비스
+│   ├── store/              # Redux 상태 관리
+│   │   └── authSlice.ts    # 인증 상태
+│   ├── types/              # TypeScript 타입
+│   │   └── auth.ts         # 인증 타입
+│   └── App.tsx             # 메인 컴포넌트
+├── package.json            # Node.js 의존성
+└── Dockerfile              # 프론트엔드 컨테이너
+```
+
 ### 📁 설정 파일 (`config/`)
 ```
 config/
 └── config.yaml            # 시스템 설정 (YAML)
+```
+
+### 📁 Docker 설정 - 신규
+```
+├── docker-compose.yml     # 전체 서비스 오케스트레이션
+├── backend/Dockerfile     # 백엔드 컨테이너
+├── frontend/Dockerfile    # 프론트엔드 컨테이너
+└── env.example            # 환경 변수 예시
 ```
 
 ### 📁 문서 (`docs/`)

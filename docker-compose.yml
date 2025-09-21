@@ -1,65 +1,84 @@
+# Phase 2 전체 서비스 Docker Compose
+
 version: '3.8'
 
 services:
-  trading-system:
-    build: .
-    container_name: trading-system
-    restart: unless-stopped
+  # PostgreSQL 데이터베이스
+  postgres:
+    image: postgres:15-alpine
+    container_name: crypto_trading_postgres
     environment:
-      - TRADING_ENV=production
-      - LOG_LEVEL=INFO
-    env_file:
-      - .env
+      POSTGRES_DB: crypto_trading
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
     volumes:
-      - ./data:/app/data
-      - ./logs:/app/logs
-      - ./config:/app/config
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
     ports:
-      - "8000:8000"
-    networks:
-      - trading-network
-    depends_on:
-      - redis
-      - postgres
+      - "5432:5432"
     healthcheck:
-      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8000/health')"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
+      test: ["CMD-SHELL", "pg_isready -U user -d crypto_trading"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
+  # Redis 캐시
   redis:
     image: redis:7-alpine
-    container_name: trading-redis
-    restart: unless-stopped
+    container_name: crypto_trading_redis
     ports:
       - "6379:6379"
     volumes:
       - redis_data:/data
-    networks:
-      - trading-network
-    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
-  postgres:
-    image: postgres:15-alpine
-    container_name: trading-postgres
-    restart: unless-stopped
+  # 백엔드 API 서버
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: crypto_trading_backend
     environment:
-      - POSTGRES_DB=trading_system
-      - POSTGRES_USER=trading_user
-      - POSTGRES_PASSWORD=trading_password
+      - DATABASE_URL=postgresql://user:password@postgres:5432/crypto_trading
+      - REDIS_URL=redis://redis:6379
+      - ENVIRONMENT=development
     ports:
-      - "5432:5432"
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
-    networks:
-      - trading-network
+      - ./backend:/app
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
+  # 프론트엔드 웹 서버
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: crypto_trading_frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+
+  # Nginx 리버스 프록시
   nginx:
     image: nginx:alpine
-    container_name: trading-nginx
-    restart: unless-stopped
+    container_name: crypto_trading_nginx
     ports:
       - "80:80"
       - "443:443"
@@ -67,43 +86,9 @@ services:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
       - ./nginx/ssl:/etc/nginx/ssl
     depends_on:
-      - trading-system
-    networks:
-      - trading-network
-
-  monitoring:
-    image: prom/prometheus:latest
-    container_name: trading-prometheus
-    restart: unless-stopped
-    ports:
-      - "9090:9090"
-    volumes:
-      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
-      - prometheus_data:/prometheus
-    networks:
-      - trading-network
-
-  grafana:
-    image: grafana/grafana:latest
-    container_name: trading-grafana
-    restart: unless-stopped
-    ports:
-      - "3000:3000"
-    environment:
-      - GF_SECURITY_ADMIN_PASSWORD=admin
-    volumes:
-      - grafana_data:/var/lib/grafana
-      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards
-      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources
-    networks:
-      - trading-network
+      - frontend
+      - backend
 
 volumes:
-  redis_data:
   postgres_data:
-  prometheus_data:
-  grafana_data:
-
-networks:
-  trading-network:
-    driver: bridge
+  redis_data:
