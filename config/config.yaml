@@ -1,0 +1,64 @@
+# Phase 1: 최소 기능 자동화 거래 시스템 설정
+
+trading:
+  exchange: "binance"
+  symbol: "BTCUSDT"
+  leverage: 5
+  position_size_percent: 1.0
+  max_daily_loss_percent: 2.0
+  testnet: true  # Phase 1에서는 테스트넷 사용
+
+strategies:
+  supertrend:
+    enabled: true
+    atr_period: 10
+    atr_multiplier: 3.0
+    min_periods: 10
+  rsi_mean_reversion:
+    enabled: true
+    rsi_period: 14
+    oversold_threshold: 30
+    overbought_threshold: 70
+    hold_days: 10
+    min_periods: 14
+
+risk_management:
+  max_consecutive_losses: 3
+  maintenance_margin_buffer: 1.5
+  emergency_stop_loss: true
+  max_position_size_usdt: 1000  # 최대 포지션 크기 (USDT)
+
+data:
+  timeframes:
+    - "1m"
+    - "5m" 
+    - "1h"
+    - "1d"
+  cache_days: 365
+  update_interval_seconds: 60
+
+api:
+  binance:
+    api_key: "${BINANCE_API_KEY}"
+    secret_key: "${BINANCE_SECRET_KEY}"
+    sandbox: true
+    rate_limit: 1200  # requests per minute
+
+logging:
+  level: "INFO"
+  file: "logs/trading.log"
+  max_size_mb: 100
+  backup_count: 5
+  console_output: true
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+
+database:
+  path: "data/trading.db"
+  backup_interval_hours: 24
+  max_backups: 30
+
+notifications:
+  enabled: false
+  webhook_url: "${WEBHOOK_URL}"
+  error_notifications: true
+  trade_notifications: true
