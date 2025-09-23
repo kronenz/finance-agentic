@@ -8,7 +8,7 @@ import structlog
 from app.core.database import get_db
 from app.models.user import User
 from app.services.ai_service import ai_service
-from app.services.auth_service import get_current_user
+from app.api.v1.auth import get_current_user
 from app.schemas.ai import (
     MarketAnalysisRequest,
     MarketAnalysisResponse,
@@ -104,7 +104,7 @@ async def recommend_strategies(
         
         logger.info(
             "Strategies recommended for user",
-            user_id=current_user.id,
+            user_id=str(current_user.id),
             recommendations_count=len(response)
         )
         
@@ -113,7 +113,7 @@ async def recommend_strategies(
     except Exception as e:
         logger.error(
             "Failed to recommend strategies",
-            user_id=current_user.id,
+            user_id=str(current_user.id),
             error=str(e)
         )
         raise HTTPException(
@@ -139,7 +139,7 @@ async def assess_risk(
         
         logger.info(
             "Risk assessed for user",
-            user_id=current_user.id,
+            user_id=str(current_user.id),
             risk_level=risk_assessment['risk_level'],
             risk_score=risk_assessment['total_risk_score']
         )
@@ -156,7 +156,7 @@ async def assess_risk(
     except Exception as e:
         logger.error(
             "Failed to assess risk",
-            user_id=current_user.id,
+            user_id=str(current_user.id),
             error=str(e)
         )
         raise HTTPException(
@@ -179,7 +179,7 @@ async def get_user_profile(
         )
         
         return UserProfileResponse(
-            user_id=current_user.id,
+            user_id=str(current_user.id),
             risk_tolerance=user_profile.get('risk_tolerance', 0.5),
             trading_experience=user_profile.get('trading_experience', 0.5),
             investment_horizon=user_profile.get('investment_horizon', 0.5),
@@ -191,7 +191,7 @@ async def get_user_profile(
     except Exception as e:
         logger.error(
             "Failed to get user profile",
-            user_id=current_user.id,
+            user_id=str(current_user.id),
             error=str(e)
         )
         raise HTTPException(
@@ -219,12 +219,12 @@ async def update_user_profile(
         
         logger.info(
             "User profile updated",
-            user_id=current_user.id,
+            user_id=str(current_user.id),
             updated_fields=list(update_data.keys())
         )
         
         return UserProfileResponse(
-            user_id=current_user.id,
+            user_id=str(current_user.id),
             risk_tolerance=user_profile.get('risk_tolerance', 0.5),
             trading_experience=user_profile.get('trading_experience', 0.5),
             investment_horizon=user_profile.get('investment_horizon', 0.5),
@@ -236,7 +236,7 @@ async def update_user_profile(
     except Exception as e:
         logger.error(
             "Failed to update user profile",
-            user_id=current_user.id,
+            user_id=str(current_user.id),
             error=str(e)
         )
         raise HTTPException(
@@ -277,14 +277,14 @@ async def get_models_status():
 
 async def _get_or_create_user_profile(db: AsyncSession, user_id: str) -> Dict[str, Any]:
     """사용자 프로필 조회 또는 생성"""
-    # 실제 구현에서는 데이터베이스에서 조회
-    # 여기서는 기본 프로필 반환
-    return {
-        'user_id': user_id,
-        'risk_tolerance': 0.5,
-        'trading_experience': 0.5,
-        'investment_horizon': 0.5,
-        'portfolio_size': 0.0,
+    try:
+        # 기본 프로필 반환 (실제 구현에서는 데이터베이스에서 조회)
+        return {
+            'user_id': user_id,
+            'risk_tolerance': 0.5,
+            'trading_experience': 0.5,
+            'investment_horizon': 0.5,
+            'portfolio_size': 0.0,
         'preferences': {
             'prefers_trend_following': 0.5,
             'prefers_mean_reversion': 0.5,
@@ -293,6 +293,23 @@ async def _get_or_create_user_profile(db: AsyncSession, user_id: str) -> Dict[st
         },
         'trading_history': []
     }
+    except Exception as e:
+        logger.error("Failed to get user profile", user_id=user_id, error=str(e))
+        # 기본 프로필 반환
+        return {
+            'user_id': user_id,
+            'risk_tolerance': 0.5,
+            'trading_experience': 0.5,
+            'investment_horizon': 0.5,
+            'portfolio_size': 0.0,
+            'preferences': {
+                'prefers_trend_following': 0.5,
+                'prefers_mean_reversion': 0.5,
+                'prefers_short_term': 0.5,
+                'prefers_long_term': 0.5
+            },
+            'trading_history': []
+        }
 
 async def _update_user_profile(db: AsyncSession, user_id: str, profile: Dict[str, Any]) -> None:
     """사용자 프로필 업데이트"""

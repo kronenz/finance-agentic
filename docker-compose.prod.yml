@@ -8,34 +8,101 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile.prod
+    ports:
+      - "8000:8000"
+    env_file:
+      - env.production
     environment:
-      - ENVIRONMENT=production
-      - DEBUG=false
-      - LOG_LEVEL=WARNING
-    restart: always
+      - DATABASE_URL=postgresql://crypto_user:crypto_password@postgres:5432/crypto_trading_prod
+      - REDIS_URL=redis://redis:6379/0
+    depends_on:
+      - postgres
+      - redis
+    restart: unless-stopped
+    networks:
+      - crypto-trading-network
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8000/health', timeout=10)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
     deploy:
-      replicas: 2
       resources:
         limits:
-          memory: 2G
-          cpus: '1.0'
-        reservations:
           memory: 1G
           cpus: '0.5'
+        reservations:
+          memory: 512M
+          cpus: '0.25'
 
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile.prod
+    ports:
+      - "3000:80"
     environment:
-      - REACT_APP_API_URL=https://api.crypto-trading.com
-    restart: always
+      - REACT_APP_API_URL=http://localhost:8000
+      - REACT_APP_ENVIRONMENT=production
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - crypto-trading-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
     deploy:
-      replicas: 2
       resources:
         limits:
           memory: 512M
+          cpus: '0.25'
+
+  postgres:
+    image: postgres:15
+    environment:
+      - POSTGRES_DB=crypto_trading_prod
+      - POSTGRES_USER=crypto_user
+      - POSTGRES_PASSWORD=crypto_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    networks:
+      - crypto-trading-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U crypto_user -d crypto_trading_prod"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 1G
           cpus: '0.5'
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+    networks:
+      - crypto-trading-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.1'
 
   nginx:
     image: nginx:alpine
@@ -43,43 +110,56 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - ./nginx/nginx.prod.conf:/etc/nginx/nginx.conf
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
       - ./nginx/ssl:/etc/nginx/ssl
     depends_on:
       - backend
       - frontend
-    restart: always
+    restart: unless-stopped
+    networks:
+      - crypto-trading-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
-  # 프로덕션용 데이터베이스 (고가용성)
-  postgres:
-    image: postgres:15-alpine
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    restart: unless-stopped
+    networks:
+      - crypto-trading-network
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3001:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources
     environment:
-      POSTGRES_DB: crypto_trading_prod
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-    volumes:
-      - postgres_prod_data:/var/lib/postgresql/data
-      - ./database/backup:/backup
-    restart: always
-    deploy:
-      resources:
-        limits:
-          memory: 1G
-          cpus: '0.5'
-
-  # 프로덕션용 Redis (클러스터 모드)
-  redis:
-    image: redis:7-alpine
-    command: redis-server --appendonly yes --maxmemory 512mb --maxmemory-policy allkeys-lru
-    volumes:
-      - redis_prod_data:/data
-    restart: always
-    deploy:
-      resources:
-        limits:
-          memory: 512M
-          cpus: '0.25'
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    restart: unless-stopped
+    networks:
+      - crypto-trading-network
 
 volumes:
-  postgres_prod_data:
-  redis_prod_data:
+  postgres_data:
+  prometheus_data:
+  grafana_data:
+
+networks:
+  crypto-trading-network:
+    driver: bridge

@@ -1,0 +1,80 @@
+{
+  "project": {
+    "name": "Crypto Trading Finance Platform",
+    "description": "암호화폐 거래 플랫폼 - 백엔드(FastAPI), 프론트엔드(React), AI 통합",
+    "version": "2.0.0",
+    "type": "fullstack"
+  },
+  "architecture": {
+    "backend": {
+      "framework": "FastAPI",
+      "language": "Python 3.12",
+      "database": "PostgreSQL",
+      "cache": "Redis",
+      "location": "./backend/"
+    },
+    "frontend": {
+      "framework": "React + TypeScript",
+      "bundler": "Vite",
+      "ui": "Custom CSS + Apple Design System",
+      "location": "./frontend/"
+    },
+    "ai": {
+      "integrations": ["Gemini API", "Custom Trading Strategies"],
+      "location": "./src/ai/"
+    },
+    "monitoring": {
+      "tools": ["Prometheus", "Grafana", "Elasticsearch", "Kibana"],
+      "location": "./monitoring/"
+    }
+  },
+  "key_features": [
+    "사용자 인증 및 구독 관리",
+    "실시간 암호화폐 데이터 수집",
+    "AI 기반 거래 전략",
+    "성능 모니터링 및 대시보드",
+    "구독 기반 서비스 모델"
+  ],
+  "development_workflow": {
+    "phases": {
+      "phase1": "기본 거래 시스템 (완료)",
+      "phase2": "AI 통합 및 구독 서비스 (진행중)",
+      "phase3": "고급 기능 및 최적화 (예정)"
+    },
+    "current_focus": "Phase 2 - AI 통합 및 구독 서비스"
+  },
+  "gemini_integration": {
+    "context_files": [
+      "PROJECT_INDEX.md",
+      "README.md",
+      "docs/specs/",
+      "backend/app/",
+      "frontend/src/",
+      "config/config.yaml"
+    ],
+    "exclude_patterns": [
+      "node_modules/",
+      "__pycache__/",
+      "*.pyc",
+      "*.log",
+      "venv/",
+      ".git/"
+    ],
+    "collaboration_points": [
+      "코드 리뷰 및 최적화",
+      "AI 전략 개발",
+      "버그 수정 및 디버깅",
+      "새로운 기능 구현",
+      "테스트 코드 작성",
+      "문서화 개선"
+    ]
+  },
+  "commands": {
+    "start_dev": "docker-compose up -d",
+    "start_prod": "docker-compose -f docker-compose.prod.yml up -d",
+    "test": "pytest backend/tests/",
+    "lint": "flake8 backend/ && eslint frontend/src/",
+    "build": "docker-compose build",
+    "logs": "docker-compose logs -f"
+  }
+}

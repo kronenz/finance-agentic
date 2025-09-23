@@ -107,6 +107,21 @@ const authSlice = createSlice({
     setLoading: (state, action: PayloadAction<boolean>) => {
       state.isLoading = action.payload;
     },
+    loginStart: (state) => {
+      state.isLoading = true;
+      state.error = null;
+    },
+    loginSuccess: (state, action: PayloadAction<{ user: User; token: string }>) => {
+      state.isLoading = false;
+      state.user = action.payload.user;
+      state.token = action.payload.token;
+      state.isAuthenticated = true;
+      state.error = null;
+    },
+    loginFailure: (state, action: PayloadAction<string>) => {
+      state.isLoading = false;
+      state.error = action.payload;
+    },
   },
   extraReducers: (builder) => {
     // 회원가입
@@ -217,7 +232,7 @@ const authSlice = createSlice({
 });
 
 // 액션 내보내기
-export const { clearError, setUser, clearUser, setLoading } = authSlice.actions;
+export const { clearError, setUser, clearUser, setLoading, loginStart, loginSuccess, loginFailure } = authSlice.actions;
 
 // 리듀서 내보내기
 export default authSlice.reducer;

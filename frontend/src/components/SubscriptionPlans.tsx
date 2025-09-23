@@ -1,7 +1,7 @@
 // 구독 플랜 선택 컴포넌트
 import React, { useState, useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { RootState } from '../store';
+// import { useSelector, useDispatch } from 'react-redux';
+// import { RootState } from '../store';
 import { SubscriptionPlanResponse } from '../types/subscription';
 
 interface SubscriptionPlansProps {

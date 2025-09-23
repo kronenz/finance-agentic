@@ -2,7 +2,7 @@
 구독 관련 데이터베이스 모델
 """
 
-from sqlalchemy import Column, String, Boolean, DateTime, UUID, Numeric, ForeignKey
+from sqlalchemy import Column, String, Boolean, DateTime, UUID, Numeric, ForeignKey, Text, Integer
 from sqlalchemy.dialects.postgresql import UUID as PostgresUUID, JSONB
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
@@ -61,6 +61,7 @@ class Subscription(Base):
     user = relationship("User", back_populates="subscriptions")
     plan = relationship("SubscriptionPlan", back_populates="subscriptions")
     payments = relationship("Payment", back_populates="subscription", cascade="all, delete-orphan")
+    history = relationship("SubscriptionHistory", back_populates="subscription", cascade="all, delete-orphan")
 
 class Payment(Base):
     """결제 내역 모델"""
@@ -119,3 +120,24 @@ class Coupon(Base):
     # 메타데이터
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+
+class SubscriptionHistory(Base):
+    """구독 이력 모델"""
+    __tablename__ = "subscription_histories"
+    
+    id = Column(PostgresUUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    subscription_id = Column(PostgresUUID(as_uuid=True), ForeignKey("subscriptions.id"), nullable=False)
+    
+    # 이력 정보
+    action = Column(String(50), nullable=False)  # created, updated, cancelled, reactivated
+    description = Column(Text, nullable=True)
+    
+    # 변경 사항 (JSON 형태로 저장)
+    changes = Column(JSONB, nullable=True)
+    
+    # 메타데이터
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    
+    # 관계
+    subscription = relationship("Subscription", back_populates="history")

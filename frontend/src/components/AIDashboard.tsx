@@ -1,6 +1,6 @@
 // AI 대시보드 컴포넌트
 import React, { useState, useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { RootState } from '../store';
 import { MarketAnalysisResponse, StrategyRecommendationResponse, RiskAssessmentResponse } from '../types/ai';
 

@@ -69,7 +69,7 @@ class AuthService:
     async def authenticate_user(self, email: str, password: str) -> Optional[User]:
         """사용자 인증"""
         user = await self.get_user_by_email(email)
-        if not user:
+        if not user or not user.password_hash:
             return None
         
         if not pwd_context.verify(password, user.password_hash):
@@ -144,6 +144,10 @@ class AuthService:
         await self.db.commit()
         
         return True
+    
+    async def verify_email_token(self, token: str) -> bool:
+        """이메일 인증 토큰 검증"""
+        return await self.verify_email(token)
     
     async def send_password_reset_email(self, email: str) -> bool:
         """비밀번호 재설정 이메일 전송"""

@@ -8,8 +8,8 @@ WORKDIR /app
 # package.json과 package-lock.json 복사
 COPY package*.json ./
 
-# 의존성 설치
-RUN npm ci --only=production
+# 의존성 설치 (빌드에 필요한 dev 의존성 포함)
+RUN npm install
 
 # 소스 코드 복사
 COPY . .
@@ -21,10 +21,10 @@ RUN npm run build
 FROM nginx:alpine
 
 # Nginx 설정 복사
-COPY nginx.conf /etc/nginx/nginx.conf
+COPY nginx.prod.conf /etc/nginx/nginx.conf
 
 # 빌드된 파일 복사
-COPY --from=build /app/build /usr/share/nginx/html
+COPY --from=build /app/dist /usr/share/nginx/html
 
 # 포트 노출
 EXPOSE 80

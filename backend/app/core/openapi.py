@@ -3,10 +3,9 @@ OpenAPI/Swagger 설정 및 커스터마이징
 """
 
 from fastapi.openapi.utils import get_openapi
-from app.main import app
 from app.core.config import settings
 
-def custom_openapi():
+def custom_openapi(app):
     """커스텀 OpenAPI 스키마 생성"""
     if app.openapi_schema:
         return app.openapi_schema
@@ -90,6 +89,3 @@ def custom_openapi():
     
     app.openapi_schema = openapi_schema
     return app.openapi_schema
-
-# OpenAPI 스키마 설정
-app.openapi = custom_openapi

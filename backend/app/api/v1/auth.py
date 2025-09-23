@@ -2,9 +2,11 @@
 인증 관련 API 엔드포인트
 """
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Query, Request
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 from app.core.database import get_db
 from app.schemas.auth import UserCreate, UserResponse, Token, LoginRequest
 from app.services.auth_service import AuthService
@@ -14,12 +16,36 @@ from app.models.user import User
 router = APIRouter()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
+# Rate Limiter 인스턴스 (main.py에서 가져옴)
+limiter = Limiter(key_func=get_remote_address)
+
+# 의존성 함수들
+async def get_current_user(
+    token: str = Depends(oauth2_scheme),
+    db: AsyncSession = Depends(get_db)
+) -> User:
+    """현재 로그인한 사용자 조회"""
+    auth_service = AuthService(db)
+    
+    # 토큰 검증
+    user = await auth_service.get_user_from_token(token)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="유효하지 않은 토큰입니다.",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+    return user
+
 @router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
+@limiter.limit("3/minute")
 async def register(
+    request: Request,
     user_data: UserCreate,
     db: AsyncSession = Depends(get_db)
 ):
-    """사용자 회원가입"""
+    """사용자 회원가입 (3회/분 제한)"""
     auth_service = AuthService(db)
     
     # 이메일 중복 확인
@@ -35,11 +61,13 @@ async def register(
     return UserResponse.from_orm(user)
 
 @router.post("/login", response_model=Token)
+@limiter.limit("5/minute")
 async def login(
+    request: Request,
     form_data: OAuth2PasswordRequestForm = Depends(),
     db: AsyncSession = Depends(get_db)
 ):
-    """사용자 로그인"""
+    """사용자 로그인 (5회/분 제한)"""
     auth_service = AuthService(db)
     
     # 사용자 인증
@@ -103,7 +131,7 @@ async def reset_password(
 
 @router.post("/verify-email")
 async def verify_email(
-    token: str,
+    token: str = Query(..., description="이메일 인증 토큰"),
     db: AsyncSession = Depends(get_db)
 ):
     """이메일 인증"""
@@ -113,22 +141,3 @@ async def verify_email(
     await auth_service.verify_email_token(token)
     
     return {"message": "이메일이 성공적으로 인증되었습니다."}
-
-# 의존성 함수들
-async def get_current_user(
-    token: str = Depends(oauth2_scheme),
-    db: AsyncSession = Depends(get_db)
-) -> User:
-    """현재 로그인한 사용자 조회"""
-    auth_service = AuthService(db)
-    
-    # 토큰 검증
-    user = await auth_service.get_user_from_token(token)
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="유효하지 않은 토큰입니다.",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-    
-    return user

@@ -19,10 +19,11 @@ class Settings(BaseSettings):
     HOST: str = "0.0.0.0"
     PORT: int = 8000
     ALLOWED_HOSTS: List[str] = ["*"]
+    FRONTEND_URL: str = "http://localhost:3000"
     
     # 데이터베이스 설정
-    DATABASE_URL: str = "postgresql://user:password@localhost:5432/crypto_trading"
-    REDIS_URL: str = "redis://localhost:6379"
+    DATABASE_URL: str = "postgresql://user:password@postgres:5432/crypto_trading"
+    REDIS_URL: str = "redis://redis:6379"
     
     # JWT 설정
     SECRET_KEY: str = "your-secret-key-here"

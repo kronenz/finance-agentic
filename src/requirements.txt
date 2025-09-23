@@ -1,0 +1,27 @@
+# Phase 1 최소 기능 자동화 거래 시스템 의존성
+
+# 핵심 라이브러리
+pydantic>=2.0.0
+python-dotenv>=1.0.0
+pyyaml>=6.0
+
+# 데이터 처리
+pandas>=2.0.0
+numpy>=1.24.0
+
+# 거래소 API
+ccxt>=4.0.0
+
+# 기술적 지표
+TA-Lib>=0.4.25
+
+# 로깅 및 모니터링
+rich>=13.0.0
+schedule>=1.2.0
+
+# 데이터베이스
+sqlalchemy>=2.0.0
+
+# 기타 유틸리티
+requests>=2.31.0
+python-dateutil>=2.8.0

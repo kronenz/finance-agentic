@@ -125,8 +125,8 @@ export class AuthService {
   static saveTokens(authResponse: AuthResponse): void {
     localStorage.setItem('token', authResponse.access_token);
     // 리프레시 토큰이 있다면 저장
-    if (authResponse.refresh_token) {
-      localStorage.setItem('refreshToken', authResponse.refresh_token);
+    if ((authResponse as any).refresh_token) {
+      localStorage.setItem('refreshToken', (authResponse as any).refresh_token);
     }
   }
 

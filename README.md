@@ -17,8 +17,21 @@
 finance/
 ├── docs/                    # 문서 및 명세서
 │   ├── specs/              # 단계별 명세서
-│   └── architecture/       # 아키텍처 문서
-├── src/                    # 소스 코드
+│   ├── architecture/       # 아키텍처 문서
+│   └── design/             # 디자인 가이드라인
+├── frontend/               # React 프론트엔드
+│   ├── src/               # 소스 코드
+│   │   ├── components/    # React 컴포넌트
+│   │   ├── styles/        # CSS 스타일
+│   │   └── services/      # API 서비스
+│   └── public/            # 정적 파일
+├── backend/                # FastAPI 백엔드
+│   ├── app/               # 애플리케이션 코드
+│   │   ├── api/           # API 엔드포인트
+│   │   ├── models/        # 데이터베이스 모델
+│   │   └── services/      # 비즈니스 로직
+│   └── requirements.txt   # Python 의존성
+├── src/                    # 레거시 소스 코드
 │   ├── core/              # 핵심 로직
 │   ├── strategies/        # 거래 전략
 │   ├── data/              # 데이터 처리
@@ -29,17 +42,78 @@ finance/
 └── deployment/            # 배포 관련 파일
 ```
 
+## 🎨 UI/UX 디자인 시스템
+
+### 디자인 철학
+- **Apple 홈페이지 스타일**: 깔끔하고 직관적인 사용자 경험
+- **일관성**: 모든 컴포넌트에서 통일된 디자인 언어 사용
+- **접근성**: 모든 사용자가 쉽게 접근할 수 있는 인터페이스
+- **반응형**: 모든 디바이스에서 최적화된 경험 제공
+
+### 주요 특징
+- **색상 팔레트**: Apple의 시스템 색상을 기반으로 한 일관된 색상 체계
+- **타이포그래피**: SF Pro 폰트를 사용한 명확하고 읽기 쉬운 텍스트
+- **아이콘 시스템**: 12px~32px 크기의 일관된 아이콘 크기 체계
+- **애니메이션**: 부드럽고 자연스러운 전환 효과
+- **그림자**: 계층감을 표현하는 세련된 그림자 효과
+
+### 디자인 가이드라인
+자세한 디자인 가이드라인은 [웹 디자인 가이드라인 스펙](./docs/design/web_design_guidelines.md)을 참조하세요.
+
+## 🛠️ 기술 스택
+
+### Frontend
+- **React 18**: 사용자 인터페이스 구축
+- **TypeScript**: 타입 안전성 보장
+- **Vite**: 빠른 개발 서버 및 빌드 도구
+- **Redux Toolkit**: 상태 관리
+- **React Router**: 클라이언트 사이드 라우팅
+- **Tailwind CSS**: 유틸리티 우선 CSS 프레임워크
+- **CSS3**: Apple 스타일 커스텀 스타일링
+
+### Backend
+- **FastAPI**: 고성능 Python 웹 프레임워크
+- **PostgreSQL**: 관계형 데이터베이스
+- **SQLAlchemy**: ORM (Object-Relational Mapping)
+- **Alembic**: 데이터베이스 마이그레이션
+- **Redis**: 캐싱 및 세션 관리
+- **JWT**: 인증 토큰 관리
+- **Pydantic**: 데이터 검증 및 직렬화
+
+### AI/ML
+- **scikit-learn**: 머신러닝 라이브러리
+- **pandas**: 데이터 분석 및 처리
+- **numpy**: 수치 계산
+- **python-binance**: 암호화폐 거래소 API
+
+### DevOps & Infrastructure
+- **Docker**: 컨테이너화
+- **Docker Compose**: 멀티 컨테이너 오케스트레이션
+- **Nginx**: 웹 서버 및 리버스 프록시
+- **Prometheus**: 메트릭 수집
+- **Grafana**: 모니터링 대시보드
+- **GitHub Actions**: CI/CD 파이프라인
+
+### 개발 도구
+- **ESLint**: JavaScript/TypeScript 린팅
+- **Prettier**: 코드 포맷팅
+- **Jest**: 테스트 프레임워크
+- **pytest**: Python 테스트 프레임워크
+- **Black**: Python 코드 포맷팅
+
 ## 개발 단계
 
-### Phase 1: 기본 자동화 거래 (현재)
+### Phase 1: 기본 자동화 거래 (완료)
 - 단순한 기술적 지표 기반 매매
 - 기본적인 리스크 관리
 - 실시간 가격 모니터링
 
-### Phase 2: 적응형 전략 시스템
-- 시장 국면 감지
-- 추세추종 vs 평균회귀 전략 전환
-- 다중 시간대 분석
+### Phase 2: 개인형 구독 서비스 (현재 - 85% 완료)
+- 사용자 인증 및 회원가입 시스템
+- 구독 플랜 관리
+- AI 기반 투자 추천
+- 실시간 대시보드
+- Apple 스타일 UI/UX 적용
 
 ### Phase 3: AI 에이전트 통합
 - 머신러닝 기반 국면 분류

@@ -2,7 +2,7 @@
  * 메인 App 컴포넌트
  */
 
-import React from 'react';
+// import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { store } from './store';
@@ -10,7 +10,7 @@ import LoginForm from './components/LoginForm';
 import RegisterForm from './components/RegisterForm';
 import Dashboard from './components/Dashboard';
 import ProtectedRoute from './components/ProtectedRoute';
-import './App.css';
+// import './App.css';
 
 function App() {
   return (

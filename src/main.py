@@ -11,13 +11,14 @@ from datetime import datetime
 from typing import Dict, List, Optional
 import pandas as pd
 
-from core.config import get_config, reload_config
-from core.logger import get_logger, log_system_event
-from core.database import get_database
-from data.market_data import get_market_data
-from data.indicators import get_indicators
-from strategies.supertrend import SupertrendStrategy
-from strategies.rsi_mean_reversion import RSIMeanReversionStrategy
+from .core.config import get_config, reload_config
+from .core.logger import get_logger, log_system_event
+from .core.database import get_database
+from .data.market_data import get_market_data
+from .data.indicators import get_indicators
+from .data.realtime_scraper import RealTimeScraper
+from .strategies.supertrend import SupertrendStrategy
+from .strategies.rsi_mean_reversion import RSIMeanReversionStrategy
 
 
 class TradingSystem:
@@ -29,6 +30,7 @@ class TradingSystem:
         self.db = get_database()
         self.market_data = get_market_data()
         self.indicators = get_indicators()
+        self.realtime_scraper = RealTimeScraper()
         
         # 전략 초기화
         self.strategies = self._initialize_strategies()
@@ -285,6 +287,44 @@ class TradingSystem:
         except Exception as e:
             self.logger.error(f"포지션 청산 실패: {e}")
     
+    def start_realtime_scraping(self, symbol: str = "BTCUSDT", 
+                              interval: int = 10, max_iterations: int = 10) -> List[Dict]:
+        """실시간 데이터 스크래핑 시작"""
+        try:
+            self.logger.info(f"실시간 데이터 스크래핑 시작: {symbol}")
+            
+            # 실시간 스크래핑 실행
+            scraped_data = self.realtime_scraper.start_continuous_scraping(
+                symbol=symbol,
+                interval=interval,
+                max_iterations=max_iterations
+            )
+            
+            if scraped_data:
+                # 시장 상황 분석
+                market_analysis = self.realtime_scraper.analyze_market_conditions(scraped_data)
+                
+                self.logger.info(f"실시간 스크래핑 완료: {len(scraped_data)}개 수집")
+                self.logger.info(f"시장 상태: {market_analysis['market_status']}")
+                self.logger.info(f"거래 신호: {market_analysis['signal']}")
+                
+                return scraped_data
+            else:
+                self.logger.warning("실시간 스크래핑 실패")
+                return []
+                
+        except Exception as e:
+            self.logger.error(f"실시간 스크래핑 오류: {e}")
+            return []
+    
+    def get_realtime_data(self, symbol: str = "BTCUSDT") -> Optional[Dict]:
+        """단일 실시간 데이터 수집"""
+        try:
+            return self.realtime_scraper.scrape_realtime_data(symbol)
+        except Exception as e:
+            self.logger.error(f"실시간 데이터 수집 오류: {e}")
+            return None
+    
     def get_system_status(self) -> Dict[str, any]:
         """시스템 상태 조회"""
         return {
@@ -298,6 +338,10 @@ class TradingSystem:
                 'symbol': self.config.trading.symbol,
                 'leverage': self.config.trading.leverage,
                 'testnet': self.config.trading.testnet
+            },
+            'realtime_scraper': {
+                'available': True,
+                'status': 'ready'
             }
         }
 

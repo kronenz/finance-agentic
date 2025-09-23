@@ -3,8 +3,8 @@
 export interface User {
   id: string;
   email: string;
-  firstName: string;
-  lastName: string;
+  first_name: string;
+  last_name: string;
   phone?: string;
   country?: string;
   timezone: string;
@@ -25,8 +25,8 @@ export interface AuthResponse {
 }
 
 export interface RegisterRequest {
-  firstName: string;
-  lastName: string;
+  first_name: string;
+  last_name: string;
   email: string;
   password: string;
   agreeToTerms: boolean;

@@ -15,7 +15,7 @@ from app.schemas.subscription import (
     SubscriptionStatus
 )
 from app.services.subscription_service import SubscriptionService
-from app.services.auth_service import get_current_user
+from app.api.v1.auth import get_current_user
 
 # 로거 설정
 logger = structlog.get_logger()

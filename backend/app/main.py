@@ -2,23 +2,30 @@
 Phase 2 개인형 구독 서비스 - FastAPI 메인 애플리케이션
 """
 
-from fastapi import FastAPI, HTTPException, Depends
+from fastapi import FastAPI, HTTPException, Depends, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import JSONResponse
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
 import uvicorn
 import structlog
 
 from app.core.config import settings
 from app.core.database import engine, Base
 from app.core.openapi import custom_openapi
-from app.api.v1 import auth, subscriptions, trading, dashboard, ai
+from app.core.logging import setup_logging
+from app.middleware.logging_middleware import LoggingMiddleware
+from app.api.v1 import auth, subscriptions, ai
 from app.monitoring.health_check import router as health_router
-from app.middleware.auth import AuthMiddleware
-from app.middleware.logging import LoggingMiddleware
 
-# 로거 설정
+# 로깅 시스템 설정
+setup_logging(environment=settings.ENVIRONMENT)
 logger = structlog.get_logger()
+
+# Rate Limiter 설정
+limiter = Limiter(key_func=get_remote_address)
 
 # FastAPI 앱 생성
 app = FastAPI(
@@ -44,8 +51,13 @@ app.add_middleware(
     allowed_hosts=settings.ALLOWED_HOSTS
 )
 
+# Rate Limiter 설정
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+# 로깅 미들웨어 추가
 app.add_middleware(LoggingMiddleware)
-app.add_middleware(AuthMiddleware)
+
 
 # 데이터베이스 테이블 생성
 @app.on_event("startup")
@@ -78,8 +90,6 @@ async def health_check():
 # API 라우터 등록
 app.include_router(auth.router, prefix="/api/v1/auth", tags=["authentication"])
 app.include_router(subscriptions.router, prefix="/api/v1/subscriptions", tags=["subscriptions"])
-app.include_router(trading.router, prefix="/api/v1/trading", tags=["trading"])
-app.include_router(dashboard.router, prefix="/api/v1/dashboard", tags=["dashboard"])
 app.include_router(ai.router, prefix="/api/v1/ai", tags=["ai"])
 
 # 모니터링 라우터 등록

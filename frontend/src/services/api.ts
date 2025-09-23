@@ -1,10 +1,10 @@
 // API 클라이언트 설정
 
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
-import { AuthResponse } from '../types/auth';
+// import { AuthResponse } from '../types/auth';
 
 // API 기본 설정
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
+const API_BASE_URL = (import.meta as any).env?.VITE_API_BASE_URL || 'http://localhost:8000/api';
 
 // Axios 인스턴스 생성
 const apiClient: AxiosInstance = axios.create({

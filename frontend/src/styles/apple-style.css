@@ -1,0 +1,706 @@
+/* Apple 홈페이지 스타일 - UI/UX 디자이너 설계 */
+
+/* Apple 스타일 변수 */
+:root {
+  /* Apple 색상 팔레트 */
+  --apple-blue: #007AFF;
+  --apple-blue-dark: #0051D5;
+  --apple-blue-light: #4A9EFF;
+  --apple-gray-1: #F2F2F7;
+  --apple-gray-2: #E5E5EA;
+  --apple-gray-3: #D1D1D6;
+  --apple-gray-4: #C7C7CC;
+  --apple-gray-5: #AEAEB2;
+  --apple-gray-6: #8E8E93;
+  --apple-gray-7: #636366;
+  --apple-gray-8: #48484A;
+  --apple-gray-9: #3A3A3C;
+  --apple-gray-10: #2C2C2E;
+  --apple-gray-11: #1C1C1E;
+  
+  /* Apple 그라데이션 */
+  --apple-gradient-blue: linear-gradient(135deg, #007AFF 0%, #0051D5 100%);
+  --apple-gradient-purple: linear-gradient(135deg, #AF52DE 0%, #8E44AD 100%);
+  --apple-gradient-pink: linear-gradient(135deg, #FF2D92 0%, #E91E63 100%);
+  --apple-gradient-orange: linear-gradient(135deg, #FF9500 0%, #FF6B00 100%);
+  --apple-gradient-green: linear-gradient(135deg, #34C759 0%, #28A745 100%);
+  
+  /* Apple 타이포그래피 */
+  --apple-font-sf: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --apple-font-mono: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+  
+  /* Apple 그림자 */
+  --apple-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --apple-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.15);
+  --apple-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.2);
+  --apple-shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.25);
+  
+  /* Apple 반경 */
+  --apple-radius-sm: 8px;
+  --apple-radius-md: 12px;
+  --apple-radius-lg: 16px;
+  --apple-radius-xl: 20px;
+  --apple-radius-2xl: 24px;
+  --apple-radius-full: 50px;
+  
+  /* Apple 간격 */
+  --apple-space-1: 4px;
+  --apple-space-2: 8px;
+  --apple-space-3: 12px;
+  --apple-space-4: 16px;
+  
+  /* Apple 아이콘 크기 */
+  --apple-icon-xs: 12px;
+  --apple-icon-sm: 14px;
+  --apple-icon-md: 16px;
+  --apple-icon-lg: 20px;
+  --apple-icon-xl: 24px;
+  --apple-icon-2xl: 32px;
+  --apple-space-5: 20px;
+  --apple-space-6: 24px;
+  --apple-space-8: 32px;
+  --apple-space-10: 40px;
+  --apple-space-12: 48px;
+  --apple-space-16: 64px;
+  --apple-space-20: 80px;
+  --apple-space-24: 96px;
+  --apple-space-32: 128px;
+}
+
+/* Apple 스타일 기본 설정 */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--apple-font-sf);
+  font-size: 17px;
+  line-height: 1.47;
+  color: var(--apple-gray-11);
+  background-color: #ffffff;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Apple 타이포그래피 */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--apple-font-sf);
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--apple-gray-11);
+  margin-bottom: var(--apple-space-4);
+}
+
+h1 { 
+  font-size: 56px; 
+  font-weight: 700;
+  letter-spacing: -0.005em;
+}
+
+h2 { 
+  font-size: 48px; 
+  font-weight: 700;
+  letter-spacing: -0.003em;
+}
+
+h3 { 
+  font-size: 40px; 
+  font-weight: 600;
+  letter-spacing: -0.002em;
+}
+
+h4 { 
+  font-size: 32px; 
+  font-weight: 600;
+}
+
+h5 { 
+  font-size: 28px; 
+  font-weight: 600;
+}
+
+h6 { 
+  font-size: 24px; 
+  font-weight: 600;
+}
+
+p {
+  font-size: 17px;
+  line-height: 1.47;
+  color: var(--apple-gray-7);
+  margin-bottom: var(--apple-space-4);
+}
+
+/* Apple 버튼 스타일 */
+.apple-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--apple-space-2);
+  padding: var(--apple-space-3) var(--apple-space-6);
+  font-size: 17px;
+  font-weight: 400;
+  line-height: 1.47;
+  border-radius: var(--apple-radius-full);
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  text-decoration: none;
+  position: relative;
+  overflow: hidden;
+  font-family: var(--apple-font-sf);
+}
+
+.apple-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Apple 버튼 변형 */
+.apple-btn-primary {
+  background: var(--apple-blue);
+  color: white;
+  box-shadow: var(--apple-shadow-sm);
+}
+
+.apple-btn-primary:hover {
+  background: var(--apple-blue-dark);
+  transform: translateY(-1px);
+  box-shadow: var(--apple-shadow-md);
+}
+
+.apple-btn-secondary {
+  background: var(--apple-gray-1);
+  color: var(--apple-blue);
+  border: 1px solid var(--apple-gray-3);
+}
+
+.apple-btn-secondary:hover {
+  background: var(--apple-gray-2);
+  border-color: var(--apple-gray-4);
+}
+
+.apple-btn-outline {
+  background: transparent;
+  color: var(--apple-blue);
+  border: 1px solid var(--apple-blue);
+}
+
+.apple-btn-outline:hover {
+  background: var(--apple-blue);
+  color: white;
+}
+
+.apple-btn-ghost {
+  background: transparent;
+  color: var(--apple-gray-7);
+  border: none;
+}
+
+.apple-btn-ghost:hover {
+  background: var(--apple-gray-1);
+  color: var(--apple-gray-11);
+}
+
+/* Apple 입력 필드 */
+.apple-input-group {
+  position: relative;
+  margin-bottom: var(--apple-space-6);
+}
+
+.apple-input-label {
+  display: block;
+  font-size: 17px;
+  font-weight: 400;
+  color: var(--apple-gray-11);
+  margin-bottom: var(--apple-space-2);
+}
+
+.apple-input-field {
+  width: 100%;
+  padding: var(--apple-space-4) var(--apple-space-5);
+  font-size: 17px;
+  line-height: 1.47;
+  color: var(--apple-gray-11);
+  background: var(--apple-gray-1);
+  border: 1px solid var(--apple-gray-3);
+  border-radius: var(--apple-radius-md);
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  font-family: var(--apple-font-sf);
+}
+
+.apple-input-field:focus {
+  outline: none;
+  border-color: var(--apple-blue);
+  background: white;
+  box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.1);
+}
+
+.apple-input-field:invalid {
+  border-color: #FF3B30;
+  box-shadow: 0 0 0 4px rgba(255, 59, 48, 0.1);
+}
+
+.apple-input-error {
+  margin-top: var(--apple-space-1);
+  font-size: 15px;
+  color: #FF3B30;
+}
+
+/* Apple 카드 스타일 */
+.apple-card {
+  background: white;
+  border-radius: var(--apple-radius-lg);
+  box-shadow: var(--apple-shadow-sm);
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  border: 1px solid var(--apple-gray-2);
+}
+
+.apple-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--apple-shadow-lg);
+}
+
+.apple-card-header {
+  padding: var(--apple-space-8);
+  border-bottom: 1px solid var(--apple-gray-2);
+  background: linear-gradient(135deg, rgba(0, 122, 255, 0.05) 0%, rgba(0, 122, 255, 0.02) 100%);
+}
+
+.apple-card-title {
+  font-size: 28px;
+  font-weight: 600;
+  color: var(--apple-gray-11);
+  margin: 0;
+  letter-spacing: -0.002em;
+}
+
+.apple-card-subtitle {
+  font-size: 17px;
+  color: var(--apple-gray-7);
+  margin-top: var(--apple-space-2);
+}
+
+.apple-card-body {
+  padding: var(--apple-space-8);
+}
+
+.apple-card-footer {
+  padding: var(--apple-space-8);
+  border-top: 1px solid var(--apple-gray-2);
+  background: var(--apple-gray-1);
+}
+
+/* Apple 알림 스타일 */
+.apple-alert {
+  padding: var(--apple-space-5);
+  border-radius: var(--apple-radius-md);
+  margin-bottom: var(--apple-space-6);
+  border: 1px solid transparent;
+  position: relative;
+  font-size: 17px;
+  line-height: 1.47;
+}
+
+.apple-alert-success {
+  background: rgba(52, 199, 89, 0.1);
+  border-color: rgba(52, 199, 89, 0.3);
+  color: #1D8348;
+}
+
+.apple-alert-error {
+  background: rgba(255, 59, 48, 0.1);
+  border-color: rgba(255, 59, 48, 0.3);
+  color: #D32F2F;
+}
+
+.apple-alert-warning {
+  background: rgba(255, 149, 0, 0.1);
+  border-color: rgba(255, 149, 0, 0.3);
+  color: #E65100;
+}
+
+.apple-alert-info {
+  background: rgba(0, 122, 255, 0.1);
+  border-color: rgba(0, 122, 255, 0.3);
+  color: #1976D2;
+}
+
+/* Apple 체크박스 */
+.apple-checkbox-group {
+  display: flex;
+  align-items: center;
+  gap: var(--apple-space-3);
+  margin-bottom: var(--apple-space-6);
+}
+
+.apple-checkbox {
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--apple-gray-4);
+  border-radius: 4px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  position: relative;
+}
+
+.apple-checkbox:checked {
+  background: var(--apple-blue);
+  border-color: var(--apple-blue);
+}
+
+.apple-checkbox:checked::after {
+  content: '✓';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.apple-checkbox:focus {
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.1);
+}
+
+.apple-checkbox-label {
+  font-size: 17px;
+  color: var(--apple-gray-11);
+  cursor: pointer;
+  line-height: 1.47;
+}
+
+/* Apple 네비게이션 */
+.apple-navbar {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--apple-gray-2);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.apple-navbar-brand {
+  font-size: 21px;
+  font-weight: 600;
+  color: var(--apple-gray-11);
+  text-decoration: none;
+  letter-spacing: -0.001em;
+}
+
+.apple-navbar-link {
+  color: var(--apple-gray-7);
+  text-decoration: none;
+  font-weight: 400;
+  font-size: 17px;
+  transition: color 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.apple-navbar-link:hover {
+  color: var(--apple-blue);
+}
+
+/* Apple 히어로 섹션 */
+.apple-hero {
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  padding: var(--apple-space-32) 0;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.apple-hero::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="apple-grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23apple-grain)"/></svg>');
+  opacity: 0.1;
+}
+
+.apple-hero-content {
+  position: relative;
+  z-index: 1;
+}
+
+.apple-hero-title {
+  font-size: 56px;
+  font-weight: 700;
+  color: var(--apple-gray-11);
+  margin-bottom: var(--apple-space-6);
+  letter-spacing: -0.005em;
+}
+
+.apple-hero-subtitle {
+  font-size: 28px;
+  font-weight: 400;
+  color: var(--apple-gray-7);
+  margin-bottom: var(--apple-space-8);
+  letter-spacing: -0.002em;
+}
+
+/* Apple 그리드 시스템 */
+.apple-grid {
+  display: grid;
+  gap: var(--apple-space-8);
+}
+
+.apple-grid-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+.apple-grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.apple-grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.apple-grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+/* Apple 플렉스박스 */
+.apple-flex {
+  display: flex;
+}
+
+.apple-flex-col {
+  flex-direction: column;
+}
+
+.apple-flex-row {
+  flex-direction: row;
+}
+
+.apple-items-center {
+  align-items: center;
+}
+
+.apple-justify-center {
+  justify-content: center;
+}
+
+.apple-justify-between {
+  justify-content: space-between;
+}
+
+/* Apple 간격 */
+.apple-p-0 { padding: 0; }
+.apple-p-4 { padding: var(--apple-space-4); }
+.apple-p-6 { padding: var(--apple-space-6); }
+.apple-p-8 { padding: var(--apple-space-8); }
+.apple-p-12 { padding: var(--apple-space-12); }
+.apple-p-16 { padding: var(--apple-space-16); }
+.apple-p-20 { padding: var(--apple-space-20); }
+.apple-p-24 { padding: var(--apple-space-24); }
+.apple-p-32 { padding: var(--apple-space-32); }
+
+.apple-px-4 { padding-left: var(--apple-space-4); padding-right: var(--apple-space-4); }
+.apple-px-6 { padding-left: var(--apple-space-6); padding-right: var(--apple-space-6); }
+.apple-px-8 { padding-left: var(--apple-space-8); padding-right: var(--apple-space-8); }
+.apple-px-12 { padding-left: var(--apple-space-12); padding-right: var(--apple-space-12); }
+.apple-px-16 { padding-left: var(--apple-space-16); padding-right: var(--apple-space-16); }
+
+.apple-py-4 { padding-top: var(--apple-space-4); padding-bottom: var(--apple-space-4); }
+.apple-py-6 { padding-top: var(--apple-space-6); padding-bottom: var(--apple-space-6); }
+.apple-py-8 { padding-top: var(--apple-space-8); padding-bottom: var(--apple-space-8); }
+.apple-py-12 { padding-top: var(--apple-space-12); padding-bottom: var(--apple-space-12); }
+.apple-py-16 { padding-top: var(--apple-space-16); padding-bottom: var(--apple-space-16); }
+.apple-py-20 { padding-top: var(--apple-space-20); padding-bottom: var(--apple-space-20); }
+.apple-py-24 { padding-top: var(--apple-space-24); padding-bottom: var(--apple-space-24); }
+.apple-py-32 { padding-top: var(--apple-space-32); padding-bottom: var(--apple-space-32); }
+
+/* Apple 마진 */
+.apple-m-0 { margin: 0; }
+.apple-m-4 { margin: var(--apple-space-4); }
+.apple-m-6 { margin: var(--apple-space-6); }
+.apple-m-8 { margin: var(--apple-space-8); }
+.apple-m-12 { margin: var(--apple-space-12); }
+.apple-m-16 { margin: var(--apple-space-16); }
+.apple-m-20 { margin: var(--apple-space-20); }
+.apple-m-24 { margin: var(--apple-space-24); }
+
+.apple-mx-auto { margin-left: auto; margin-right: auto; }
+.apple-mx-4 { margin-left: var(--apple-space-4); margin-right: var(--apple-space-4); }
+.apple-mx-6 { margin-left: var(--apple-space-6); margin-right: var(--apple-space-6); }
+.apple-mx-8 { margin-left: var(--apple-space-8); margin-right: var(--apple-space-8); }
+
+.apple-my-0 { margin-top: 0; margin-bottom: 0; }
+.apple-my-4 { margin-top: var(--apple-space-4); margin-bottom: var(--apple-space-4); }
+.apple-my-6 { margin-top: var(--apple-space-6); margin-bottom: var(--apple-space-6); }
+.apple-my-8 { margin-top: var(--apple-space-8); margin-bottom: var(--apple-space-8); }
+.apple-my-12 { margin-top: var(--apple-space-12); margin-bottom: var(--apple-space-12); }
+.apple-my-16 { margin-top: var(--apple-space-16); margin-bottom: var(--apple-space-16); }
+.apple-my-20 { margin-top: var(--apple-space-20); margin-bottom: var(--apple-space-20); }
+.apple-my-24 { margin-top: var(--apple-space-24); margin-bottom: var(--apple-space-24); }
+
+/* Apple 너비 */
+.apple-w-full { width: 100%; }
+.apple-w-auto { width: auto; }
+.apple-w-fit { width: fit-content; }
+
+/* Apple 높이 */
+.apple-h-full { height: 100%; }
+.apple-h-auto { height: auto; }
+.apple-h-screen { height: 100vh; }
+
+/* Apple 텍스트 정렬 */
+.apple-text-left { text-align: left; }
+.apple-text-center { text-align: center; }
+.apple-text-right { text-align: right; }
+
+/* Apple 텍스트 크기 */
+.apple-text-sm { font-size: 15px; }
+.apple-text-base { font-size: 17px; }
+.apple-text-lg { font-size: 21px; }
+.apple-text-xl { font-size: 24px; }
+.apple-text-2xl { font-size: 28px; }
+.apple-text-3xl { font-size: 32px; }
+.apple-text-4xl { font-size: 40px; }
+.apple-text-5xl { font-size: 48px; }
+.apple-text-6xl { font-size: 56px; }
+
+/* Apple 텍스트 색상 */
+.apple-text-primary { color: var(--apple-blue); }
+.apple-text-gray-7 { color: var(--apple-gray-7); }
+.apple-text-gray-11 { color: var(--apple-gray-11); }
+
+/* Apple 배경 색상 */
+.apple-bg-white { background-color: white; }
+.apple-bg-gray-1 { background-color: var(--apple-gray-1); }
+.apple-bg-gray-2 { background-color: var(--apple-gray-2); }
+
+/* Apple 그림자 */
+.apple-shadow-sm { box-shadow: var(--apple-shadow-sm); }
+.apple-shadow-md { box-shadow: var(--apple-shadow-md); }
+.apple-shadow-lg { box-shadow: var(--apple-shadow-lg); }
+.apple-shadow-xl { box-shadow: var(--apple-shadow-xl); }
+
+/* Apple 반경 */
+.apple-rounded-sm { border-radius: var(--apple-radius-sm); }
+.apple-rounded-md { border-radius: var(--apple-radius-md); }
+.apple-rounded-lg { border-radius: var(--apple-radius-lg); }
+.apple-rounded-xl { border-radius: var(--apple-radius-xl); }
+.apple-rounded-2xl { border-radius: var(--apple-radius-2xl); }
+.apple-rounded-full { border-radius: var(--apple-radius-full); }
+
+/* Apple 애니메이션 */
+.apple-animate-fade-in {
+  animation: appleFadeIn 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.apple-animate-slide-up {
+  animation: appleSlideUp 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.apple-animate-scale-in {
+  animation: appleScaleIn 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+@keyframes appleFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes appleSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes appleScaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Apple 호버 효과 */
+.apple-hover-scale:hover {
+  transform: scale(1.02);
+  transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.apple-hover-shadow:hover {
+  box-shadow: var(--apple-shadow-lg);
+  transition: box-shadow 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* Apple 반응형 */
+@media (max-width: 768px) {
+  .apple-hero-title {
+    font-size: 40px;
+  }
+  
+  .apple-hero-subtitle {
+    font-size: 21px;
+  }
+  
+  .apple-grid-2,
+  .apple-grid-3,
+  .apple-grid-4 {
+    grid-template-columns: 1fr;
+  }
+  
+  .apple-px-4 {
+    padding-left: var(--apple-space-4);
+    padding-right: var(--apple-space-4);
+  }
+  
+  .apple-px-6 {
+    padding-left: var(--apple-space-4);
+    padding-right: var(--apple-space-4);
+  }
+  
+  .apple-px-8 {
+    padding-left: var(--apple-space-4);
+    padding-right: var(--apple-space-4);
+  }
+}
+
+@media (max-width: 480px) {
+  .apple-hero-title {
+    font-size: 32px;
+  }
+  
+  .apple-hero-subtitle {
+    font-size: 17px;
+  }
+  
+  .apple-card-header,
+  .apple-card-body,
+  .apple-card-footer {
+    padding: var(--apple-space-6);
+  }
+}
+
+/* Apple 아이콘 크기 유틸리티 */
+.apple-w-3 { width: var(--apple-icon-xs); }
+.apple-h-3 { height: var(--apple-icon-xs); }
+.apple-w-3\.5 { width: var(--apple-icon-sm); }
+.apple-h-3\.5 { height: var(--apple-icon-sm); }
+.apple-w-4 { width: var(--apple-icon-md); }
+.apple-h-4 { height: var(--apple-icon-md); }
+.apple-w-5 { width: var(--apple-icon-lg); }
+.apple-h-5 { height: var(--apple-icon-lg); }
+.apple-w-6 { width: var(--apple-icon-xl); }
+.apple-h-6 { height: var(--apple-icon-xl); }
+.apple-w-8 { width: var(--apple-icon-2xl); }
+.apple-h-8 { height: var(--apple-icon-2xl); }

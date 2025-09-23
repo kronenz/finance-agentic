@@ -1,6 +1,6 @@
 // 구독 관리 컴포넌트
 import React, { useState, useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { RootState } from '../store';
 import { SubscriptionResponse } from '../types/subscription';
 

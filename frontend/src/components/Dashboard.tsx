@@ -5,7 +5,7 @@
 import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store';
-import { logout } from '../store/authSlice';
+import { logoutUser } from '../store/authSlice';
 import { useNavigate } from 'react-router-dom';
 
 const Dashboard: React.FC = () => {
@@ -14,28 +14,30 @@ const Dashboard: React.FC = () => {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    dispatch(logout());
+    dispatch(logoutUser() as any);
     navigate('/login');
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* 네비게이션 바 */}
-      <nav className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex items-center">
-              <h1 className="text-xl font-semibold text-gray-900">
-                Crypto Trading Dashboard
-              </h1>
+    <div className="apple-h-screen apple-bg-white">
+      {/* Apple 스타일 네비게이션 바 */}
+      <nav className="apple-navbar">
+        <div className="apple-px-16">
+          <div className="apple-flex apple-justify-between apple-items-center apple-h-16">
+            <div className="apple-flex apple-items-center">
+              <div className="apple-navbar-brand apple-animate-fade-in">
+                <span className="apple-text-2xl apple-font-semibold apple-text-gray-11">
+                  Crypto Trading Dashboard
+                </span>
+              </div>
             </div>
-            <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-700">
-                안녕하세요, {user?.first_name}님!
+            <div className="apple-flex apple-items-center apple-gap-4 apple-animate-fade-in">
+              <span className="apple-text-base apple-text-gray-7">
+                안녕하세요, <span className="apple-text-primary apple-font-semibold">{user?.first_name}</span>님!
               </span>
               <button
                 onClick={handleLogout}
-                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium"
+                className="apple-btn apple-btn-outline apple-hover-scale"
               >
                 로그아웃
               </button>
@@ -44,43 +46,99 @@ const Dashboard: React.FC = () => {
         </div>
       </nav>
 
-      {/* 메인 콘텐츠 */}
-      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="px-4 py-6 sm:px-0">
-          <div className="border-4 border-dashed border-gray-200 rounded-lg h-96 flex items-center justify-center">
-            <div className="text-center">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">
-                대시보드에 오신 것을 환영합니다!
-              </h2>
-              <p className="text-gray-600 mb-6">
-                암호화폐 자동화 거래 서비스를 시작해보세요.
-              </p>
-              <div className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="bg-white p-6 rounded-lg shadow">
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">
-                      거래 전략
-                    </h3>
-                    <p className="text-gray-600">
-                      슈퍼트렌드, RSI 등 다양한 거래 전략을 설정하세요.
-                    </p>
-                  </div>
-                  <div className="bg-white p-6 rounded-lg shadow">
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">
-                      포트폴리오
-                    </h3>
-                    <p className="text-gray-600">
-                      실시간 포트폴리오 현황을 확인하세요.
-                    </p>
-                  </div>
-                  <div className="bg-white p-6 rounded-lg shadow">
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">
-                      분석 도구
-                    </h3>
-                    <p className="text-gray-600">
-                      AI 기반 시장 분석과 인사이트를 받아보세요.
-                    </p>
-                  </div>
+      {/* Apple 스타일 메인 콘텐츠 */}
+      <main className="apple-py-20">
+        <div className="apple-px-16">
+          <div className="apple-animate-fade-in">
+            <h2 className="apple-hero-title apple-text-6xl apple-text-gray-11 apple-mb-8 apple-text-center">
+              대시보드에 오신 것을 환영합니다! 🎉
+            </h2>
+            
+            <div className="apple-grid apple-grid-3 apple-gap-8 apple-mb-16">
+              {/* 환영 카드 */}
+              <div className="apple-card apple-hover-scale apple-hover-shadow">
+                <div className="apple-card-body apple-text-center">
+                  <div className="apple-text-6xl apple-mb-6">👋</div>
+                  <h3 className="apple-card-title">환영합니다!</h3>
+                  <p className="apple-text-gray-7 apple-text-lg">
+                    암호화폐 자동화 거래 시스템에 오신 것을 환영합니다.
+                  </p>
+                </div>
+              </div>
+
+              {/* 사용자 정보 카드 */}
+              <div className="apple-card apple-hover-scale apple-hover-shadow">
+                <div className="apple-card-header">
+                  <h3 className="apple-card-title">사용자 정보</h3>
+                </div>
+                <div className="apple-card-body">
+                  <dl className="apple-space-y-4">
+                    <div className="apple-flex apple-justify-between">
+                      <dt className="apple-text-gray-7 apple-font-medium">이메일</dt>
+                      <dd className="apple-text-gray-11 apple-font-semibold">{user?.email}</dd>
+                    </div>
+                    <div className="apple-flex apple-justify-between">
+                      <dt className="apple-text-gray-7 apple-font-medium">이름</dt>
+                      <dd className="apple-text-gray-11 apple-font-semibold">{user?.first_name}</dd>
+                    </div>
+                    <div className="apple-flex apple-justify-between">
+                      <dt className="apple-text-gray-7 apple-font-medium">성</dt>
+                      <dd className="apple-text-gray-11 apple-font-semibold">{user?.last_name}</dd>
+                    </div>
+                    <div className="apple-flex apple-justify-between">
+                      <dt className="apple-text-gray-7 apple-font-medium">가입일</dt>
+                      <dd className="apple-text-gray-11 apple-font-semibold">
+                        {user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}
+                      </dd>
+                    </div>
+                  </dl>
+                </div>
+              </div>
+
+              {/* 기능 카드 */}
+              <div className="apple-card apple-hover-scale apple-hover-shadow">
+                <div className="apple-card-body apple-text-center">
+                  <div className="apple-text-6xl apple-mb-6">🚀</div>
+                  <h3 className="apple-card-title">시작하기</h3>
+                  <p className="apple-text-gray-7 apple-text-lg apple-mb-6">
+                    AI 기반 거래 전략을 설정하고 자동화된 거래를 시작하세요.
+                  </p>
+                  <button className="apple-btn apple-btn-primary">
+                    거래 시작하기
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* 추가 기능 섹션 */}
+            <div className="apple-grid apple-grid-2 apple-gap-8">
+              <div className="apple-card apple-hover-shadow">
+                <div className="apple-card-header">
+                  <h3 className="apple-card-title">AI 분석</h3>
+                  <p className="apple-card-subtitle">시장 분석 및 전략 추천</p>
+                </div>
+                <div className="apple-card-body">
+                  <p className="apple-text-gray-7 apple-text-lg apple-mb-6">
+                    AI가 시장을 분석하고 최적의 거래 전략을 추천해드립니다.
+                  </p>
+                  <button className="apple-btn apple-btn-secondary">
+                    분석 시작하기
+                  </button>
+                </div>
+              </div>
+
+              <div className="apple-card apple-hover-shadow">
+                <div className="apple-card-header">
+                  <h3 className="apple-card-title">구독 관리</h3>
+                  <p className="apple-card-subtitle">플랜 선택 및 결제 관리</p>
+                </div>
+                <div className="apple-card-body">
+                  <p className="apple-text-gray-7 apple-text-lg apple-mb-6">
+                    다양한 구독 플랜을 선택하고 결제를 관리하세요.
+                  </p>
+                  <button className="apple-btn apple-btn-outline">
+                    구독 관리
+                  </button>
                 </div>
               </div>
             </div>

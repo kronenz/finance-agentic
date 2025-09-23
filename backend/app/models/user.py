@@ -2,7 +2,7 @@
 사용자 관련 데이터베이스 모델
 """
 
-from sqlalchemy import Column, String, Boolean, DateTime, UUID, Text
+from sqlalchemy import Column, String, Boolean, DateTime, UUID, Text, ForeignKey, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID as PostgresUUID, JSONB
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
@@ -35,9 +35,6 @@ class User(Base):
     
     # 관계
     subscriptions = relationship("Subscription", back_populates="user", cascade="all, delete-orphan")
-    trading_settings = relationship("UserTradingSettings", back_populates="user", cascade="all, delete-orphan")
-    positions = relationship("UserPosition", back_populates="user", cascade="all, delete-orphan")
-    notifications = relationship("Notification", back_populates="user", cascade="all, delete-orphan")
     social_logins = relationship("UserSocialLogin", back_populates="user", cascade="all, delete-orphan")
 
 class UserSocialLogin(Base):

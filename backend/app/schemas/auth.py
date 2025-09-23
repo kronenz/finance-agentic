@@ -19,6 +19,7 @@ class UserBase(BaseModel):
 class UserCreate(UserBase):
     """사용자 생성 스키마"""
     password: str
+    agreeToTerms: bool
     
     @validator('password')
     def validate_password(cls, v):
@@ -30,6 +31,12 @@ class UserCreate(UserBase):
             raise ValueError('비밀번호는 최소 1개의 소문자를 포함해야 합니다.')
         if not any(c.isdigit() for c in v):
             raise ValueError('비밀번호는 최소 1개의 숫자를 포함해야 합니다.')
+        return v
+    
+    @validator('agreeToTerms')
+    def validate_agree_to_terms(cls, v):
+        if not v:
+            raise ValueError('약관에 동의해야 합니다.')
         return v
 
 class UserUpdate(BaseModel):

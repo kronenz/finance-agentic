@@ -1,12 +1,12 @@
 // 성능 최적화된 대시보드 컴포넌트
 import React, { useState, useEffect, useMemo, useCallback, lazy, Suspense } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { RootState } from '../store';
 
 // 코드 스플리팅을 위한 지연 로딩
 const AIDashboard = lazy(() => import('./AIDashboard'));
 const SubscriptionManagement = lazy(() => import('./SubscriptionManagement'));
-const TradingChart = lazy(() => import('./TradingChart'));
+// const TradingChart = lazy(() => import('./TradingChart'));
 
 // 메모이제이션된 컴포넌트
 const MemoizedCard = React.memo(({ title, value, loading }: { title: string; value: string | number; loading: boolean }) => (
@@ -116,7 +116,7 @@ const PerformanceOptimizedDashboard: React.FC = () => {
       case 'trading':
         return (
           <Suspense fallback={<div className="animate-pulse h-64 bg-gray-200 rounded"></div>}>
-            <TradingChart data={chartData} />
+            {/* <TradingChart data={chartData} /> */}
           </Suspense>
         );
       default:
