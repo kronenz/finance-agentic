@@ -1,0 +1,118 @@
+version: '3.8'
+
+services:
+  # AI/ML 개발 환경
+  ai-backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.ai
+    container_name: finance-ai-backend
+    ports:
+      - "8888:8888"  # Jupyter Lab
+      - "8001:8000"  # FastAPI
+    volumes:
+      - ./backend:/app
+      - ./notebooks:/app/notebooks
+      - ./data:/app/data
+      - ai-models:/app/models
+    environment:
+      - PYTHONPATH=/app
+      - JUPYTER_ENABLE_LAB=yes
+      - REDIS_URL=redis://ai-redis:6379
+      - DATABASE_URL=postgresql://postgres:password@ai-postgres:5432/finance_ai
+    depends_on:
+      - ai-redis
+      - ai-postgres
+    networks:
+      - ai-network
+    command: /usr/local/bin/start-ai.sh
+
+  # Redis (메시지 큐 및 캐싱)
+  ai-redis:
+    image: redis:7-alpine
+    container_name: finance-ai-redis
+    ports:
+      - "6380:6379"
+    volumes:
+      - ai-redis-data:/data
+    command: redis-server --appendonly yes
+    networks:
+      - ai-network
+
+  # PostgreSQL (AI 데이터 저장)
+  ai-postgres:
+    image: postgres:15-alpine
+    container_name: finance-ai-postgres
+    ports:
+      - "5433:5432"
+    environment:
+      - POSTGRES_DB=finance_ai
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+    volumes:
+      - ai-postgres-data:/var/lib/postgresql/data
+      - ./database/init-ai.sql:/docker-entrypoint-initdb.d/init-ai.sql
+    networks:
+      - ai-network
+
+  # Jupyter Lab (개발 환경)
+  jupyter:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.ai
+    container_name: finance-jupyter
+    ports:
+      - "8889:8888"
+    volumes:
+      - ./notebooks:/app/notebooks
+      - ./data:/app/data
+      - ai-models:/app/models
+    environment:
+      - PYTHONPATH=/app
+      - JUPYTER_ENABLE_LAB=yes
+    command: jupyter lab --ip=0.0.0.0 --port=8888 --no-browser --allow-root
+    networks:
+      - ai-network
+
+  # 모니터링 (Prometheus)
+  ai-prometheus:
+    image: prom/prometheus:latest
+    container_name: finance-ai-prometheus
+    ports:
+      - "9091:9090"
+    volumes:
+      - ./monitoring/prometheus-ai.yml:/etc/prometheus/prometheus.yml
+      - ai-prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    networks:
+      - ai-network
+
+  # 모니터링 (Grafana)
+  ai-grafana:
+    image: grafana/grafana:latest
+    container_name: finance-ai-grafana
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - ai-grafana-data:/var/lib/grafana
+      - ./monitoring/grafana-ai:/etc/grafana/provisioning
+    networks:
+      - ai-network
+
+volumes:
+  ai-models:
+  ai-redis-data:
+  ai-postgres-data:
+  ai-prometheus-data:
+  ai-grafana-data:
+
+networks:
+  ai-network:
+    driver: bridge

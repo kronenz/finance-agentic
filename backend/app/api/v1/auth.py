@@ -10,7 +10,7 @@ from slowapi.util import get_remote_address
 from app.core.database import get_db
 from app.schemas.auth import UserCreate, UserResponse, Token, LoginRequest
 from app.services.auth_service import AuthService
-from app.utils.security import create_access_token, verify_password
+from app.auth.jwt import create_access_token
 from app.models.user import User
 
 router = APIRouter()

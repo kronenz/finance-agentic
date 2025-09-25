@@ -12,6 +12,9 @@ import sys
 # 프로젝트 루트를 Python 경로에 추가
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+# Import all the models, so that Base has them before being called by Alembic
+import app.models
+
 from app.core.database import Base
 from app.core.config import settings
 

@@ -1,0 +1,934 @@
+openapi: 3.0.3
+info:
+  title: AI 기반 암호화폐 거래 시스템 API
+  description: 시장 국면 자동 감지 및 전략 동적 전환을 통한 자율적 거래 실행 시스템
+  version: 1.0.0
+  contact:
+    name: AI Trading System Team
+    email: support@aitrading.com
+
+servers:
+  - url: https://api.aitrading.com/v1
+    description: Production server
+  - url: https://staging-api.aitrading.com/v1
+    description: Staging server
+
+paths:
+  /trading/signals:
+    get:
+      summary: 거래 신호 조회
+      description: AI 에이전트가 생성한 거래 신호 목록을 조회합니다
+      parameters:
+        - name: symbol
+          in: query
+          description: 거래 심볼 (예: BTCUSDT)
+          required: false
+          schema:
+            type: string
+            example: "BTCUSDT"
+        - name: signal_type
+          in: query
+          description: 신호 타입
+          required: false
+          schema:
+            type: string
+            enum: [BUY, SELL, HOLD]
+        - name: limit
+          in: query
+          description: 조회할 신호 수
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: offset
+          in: query
+          description: 오프셋
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+      responses:
+        '200':
+          description: 성공적으로 거래 신호를 조회했습니다
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/TradingSignal'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    post:
+      summary: 거래 신호 생성
+      description: AI 에이전트가 새로운 거래 신호를 생성합니다
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTradingSignalRequest'
+      responses:
+        '201':
+          description: 거래 신호가 성공적으로 생성되었습니다
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/TradingSignal'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /trading/signals/{signal_id}:
+    get:
+      summary: 특정 거래 신호 조회
+      description: ID로 특정 거래 신호를 조회합니다
+      parameters:
+        - name: signal_id
+          in: path
+          required: true
+          description: 거래 신호 ID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: 성공적으로 거래 신호를 조회했습니다
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/TradingSignal'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    put:
+      summary: 거래 신호 업데이트
+      description: 기존 거래 신호를 업데이트합니다
+      parameters:
+        - name: signal_id
+          in: path
+          required: true
+          description: 거래 신호 ID
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateTradingSignalRequest'
+      responses:
+        '200':
+          description: 거래 신호가 성공적으로 업데이트되었습니다
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/TradingSignal'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    delete:
+      summary: 거래 신호 삭제
+      description: 거래 신호를 삭제합니다
+      parameters:
+        - name: signal_id
+          in: path
+          required: true
+          description: 거래 신호 ID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: 거래 신호가 성공적으로 삭제되었습니다
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /trading/strategies:
+    get:
+      summary: 거래 전략 조회
+      description: 등록된 거래 전략 목록을 조회합니다
+      parameters:
+        - name: strategy_type
+          in: query
+          description: 전략 타입
+          required: false
+          schema:
+            type: string
+            enum: [TREND_FOLLOWING, MEAN_REVERSION]
+        - name: is_active
+          in: query
+          description: 활성 상태
+          required: false
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: 성공적으로 거래 전략을 조회했습니다
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/TradingStrategy'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /trading/strategies/{strategy_id}/performance:
+    get:
+      summary: 전략 성과 조회
+      description: 특정 전략의 성과 지표를 조회합니다
+      parameters:
+        - name: strategy_id
+          in: path
+          required: true
+          description: 전략 ID
+          schema:
+            type: string
+            format: uuid
+        - name: period
+          in: query
+          description: 조회 기간
+          required: false
+          schema:
+            type: string
+            enum: [1H, 1D, 1W, 1M]
+            default: "1D"
+      responses:
+        '200':
+          description: 성공적으로 성과 지표를 조회했습니다
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/PerformanceMetrics'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /trading/market-regime:
+    get:
+      summary: 현재 시장 국면 조회
+      description: AI가 분석한 현재 시장 국면을 조회합니다
+      responses:
+        '200':
+          description: 성공적으로 시장 국면을 조회했습니다
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/MarketRegime'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /trading/vwap/{symbol}:
+    get:
+      summary: VWAP 데이터 조회
+      description: 특정 심볼의 VWAP 데이터를 조회합니다
+      parameters:
+        - name: symbol
+          in: path
+          required: true
+          description: 거래 심볼
+          schema:
+            type: string
+            example: "BTCUSDT"
+        - name: timeframe
+          in: query
+          description: 시간 프레임
+          required: false
+          schema:
+            type: string
+            enum: [1h, 4h, 1d, 1w]
+            default: "1h"
+        - name: limit
+          in: query
+          description: 조회할 데이터 수
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 1000
+            default: 100
+      responses:
+        '200':
+          description: 성공적으로 VWAP 데이터를 조회했습니다
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/VWAPData'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /trading/volume-profile/{symbol}:
+    get:
+      summary: 거래량 프로파일 조회
+      description: 특정 심볼의 거래량 프로파일을 조회합니다
+      parameters:
+        - name: symbol
+          in: path
+          required: true
+          description: 거래 심볼
+          schema:
+            type: string
+            example: "BTCUSDT"
+        - name: timeframe
+          in: query
+          description: 시간 프레임
+          required: false
+          schema:
+            type: string
+            enum: [1h, 4h, 1d, 1w]
+            default: "1h"
+      responses:
+        '200':
+          description: 성공적으로 거래량 프로파일을 조회했습니다
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/VolumeProfile'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  schemas:
+    TradingSignal:
+      type: object
+      required:
+        - id
+        - symbol
+        - signal_type
+        - confidence
+        - entry_price
+        - stop_loss
+        - take_profit
+        - position_size
+        - created_at
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: 거래 신호 고유 ID
+        symbol:
+          type: string
+          description: 거래 심볼
+          example: "BTCUSDT"
+        signal_type:
+          type: string
+          enum: [BUY, SELL, HOLD]
+          description: 신호 타입
+        confidence:
+          type: number
+          format: float
+          minimum: 0.0
+          maximum: 1.0
+          description: 신호 신뢰도 (0.0 ~ 1.0)
+        entry_price:
+          type: number
+          format: float
+          minimum: 0
+          description: 진입 가격
+        stop_loss:
+          type: number
+          format: float
+          minimum: 0
+          description: 손절매 가격
+        take_profit:
+          type: number
+          format: float
+          minimum: 0
+          description: 익절 가격
+        position_size:
+          type: number
+          format: float
+          minimum: 0
+          description: 포지션 크기 (USD)
+        strategy_id:
+          type: string
+          format: uuid
+          description: 사용된 전략 ID
+        market_regime_id:
+          type: string
+          format: uuid
+          description: 시장 국면 ID
+        created_at:
+          type: string
+          format: date-time
+          description: 생성 시간
+        expires_at:
+          type: string
+          format: date-time
+          description: 만료 시간
+
+    CreateTradingSignalRequest:
+      type: object
+      required:
+        - symbol
+        - signal_type
+        - confidence
+        - entry_price
+        - stop_loss
+        - take_profit
+        - position_size
+        - strategy_id
+      properties:
+        symbol:
+          type: string
+          description: 거래 심볼
+          example: "BTCUSDT"
+        signal_type:
+          type: string
+          enum: [BUY, SELL, HOLD]
+          description: 신호 타입
+        confidence:
+          type: number
+          format: float
+          minimum: 0.0
+          maximum: 1.0
+          description: 신호 신뢰도
+        entry_price:
+          type: number
+          format: float
+          minimum: 0
+          description: 진입 가격
+        stop_loss:
+          type: number
+          format: float
+          minimum: 0
+          description: 손절매 가격
+        take_profit:
+          type: number
+          format: float
+          minimum: 0
+          description: 익절 가격
+        position_size:
+          type: number
+          format: float
+          minimum: 0
+          description: 포지션 크기 (USD)
+        strategy_id:
+          type: string
+          format: uuid
+          description: 사용할 전략 ID
+        market_regime_id:
+          type: string
+          format: uuid
+          description: 시장 국면 ID
+        expires_at:
+          type: string
+          format: date-time
+          description: 만료 시간
+
+    UpdateTradingSignalRequest:
+      type: object
+      properties:
+        signal_type:
+          type: string
+          enum: [BUY, SELL, HOLD]
+          description: 신호 타입
+        confidence:
+          type: number
+          format: float
+          minimum: 0.0
+          maximum: 1.0
+          description: 신호 신뢰도
+        entry_price:
+          type: number
+          format: float
+          minimum: 0
+          description: 진입 가격
+        stop_loss:
+          type: number
+          format: float
+          minimum: 0
+          description: 손절매 가격
+        take_profit:
+          type: number
+          format: float
+          minimum: 0
+          description: 익절 가격
+        position_size:
+          type: number
+          format: float
+          minimum: 0
+          description: 포지션 크기 (USD)
+
+    TradingStrategy:
+      type: object
+      required:
+        - id
+        - name
+        - strategy_type
+        - parameters
+        - is_active
+        - created_at
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: 전략 고유 ID
+        name:
+          type: string
+          description: 전략명
+          example: "SuperTrend Strategy"
+        strategy_type:
+          type: string
+          enum: [TREND_FOLLOWING, MEAN_REVERSION]
+          description: 전략 타입
+        parameters:
+          type: object
+          description: 전략 파라미터 (JSON)
+          example:
+            period: 14
+            multiplier: 2.0
+            threshold: 0.5
+        is_active:
+          type: boolean
+          description: 활성 상태
+        performance_metrics:
+          type: object
+          description: 성과 지표
+          properties:
+            total_return:
+              type: number
+              format: float
+              description: 총 수익률 (%)
+            sharpe_ratio:
+              type: number
+              format: float
+              description: 샤프 지수
+            max_drawdown:
+              type: number
+              format: float
+              description: 최대 낙폭 (%)
+            win_rate:
+              type: number
+              format: float
+              description: 승률 (%)
+        created_at:
+          type: string
+          format: date-time
+          description: 생성 시간
+        updated_at:
+          type: string
+          format: date-time
+          description: 수정 시간
+
+    MarketRegime:
+      type: object
+      required:
+        - id
+        - timestamp
+        - regime_type
+        - confidence_score
+        - created_at
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: 시장 국면 고유 ID
+        timestamp:
+          type: string
+          format: date-time
+          description: 분석 시점
+        regime_type:
+          type: string
+          enum: [TREND_UP, TREND_DOWN, RANGE_HIGH_VOL, RANGE_LOW_VOL, CRASH_EVENT]
+          description: 시장 국면 타입
+        confidence_score:
+          type: number
+          format: float
+          minimum: 0.0
+          maximum: 1.0
+          description: 신뢰도 점수
+        adx_value:
+          type: number
+          format: float
+          description: ADX 값
+        hurst_exponent:
+          type: number
+          format: float
+          description: 허스트 지수
+        volatility_level:
+          type: string
+          enum: [LOW, MEDIUM, HIGH, EXTREME]
+          description: 변동성 수준
+        created_at:
+          type: string
+          format: date-time
+          description: 생성 시간
+
+    VWAPData:
+      type: object
+      required:
+        - id
+        - symbol
+        - timeframe
+        - vwap_value
+        - volume
+        - price
+        - timestamp
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: VWAP 데이터 고유 ID
+        symbol:
+          type: string
+          description: 거래 심볼
+          example: "BTCUSDT"
+        timeframe:
+          type: string
+          enum: [1h, 4h, 1d, 1w]
+          description: 시간 프레임
+        vwap_value:
+          type: number
+          format: float
+          minimum: 0
+          description: VWAP 값
+        volume:
+          type: number
+          format: float
+          minimum: 0
+          description: 거래량
+        price:
+          type: number
+          format: float
+          minimum: 0
+          description: 현재 가격
+        deviation_bands:
+          type: object
+          description: 표준편차 밴드
+          properties:
+            upper_1std:
+              type: number
+              format: float
+            upper_2std:
+              type: number
+              format: float
+            upper_3std:
+              type: number
+              format: float
+            lower_1std:
+              type: number
+              format: float
+            lower_2std:
+              type: number
+              format: float
+            lower_3std:
+              type: number
+              format: float
+        timestamp:
+          type: string
+          format: date-time
+          description: 데이터 시점
+
+    VolumeProfile:
+      type: object
+      required:
+        - id
+        - symbol
+        - timeframe
+        - poc_price
+        - vah_price
+        - val_price
+        - volume_at_poc
+        - total_volume
+        - timestamp
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: 거래량 프로파일 고유 ID
+        symbol:
+          type: string
+          description: 거래 심볼
+          example: "BTCUSDT"
+        timeframe:
+          type: string
+          enum: [1h, 4h, 1d, 1w]
+          description: 시간 프레임
+        poc_price:
+          type: number
+          format: float
+          minimum: 0
+          description: Point of Control 가격
+        vah_price:
+          type: number
+          format: float
+          minimum: 0
+          description: Value Area High 가격
+        val_price:
+          type: number
+          format: float
+          minimum: 0
+          description: Value Area Low 가격
+        volume_at_poc:
+          type: number
+          format: float
+          minimum: 0
+          description: POC에서의 거래량
+        total_volume:
+          type: number
+          format: float
+          minimum: 0
+          description: 총 거래량
+        lvn_zones:
+          type: array
+          items:
+            type: object
+            properties:
+              start_price:
+                type: number
+                format: float
+              end_price:
+                type: number
+                format: float
+              volume_ratio:
+                type: number
+                format: float
+          description: Low Volume Node 구간들
+        timestamp:
+          type: string
+          format: date-time
+          description: 데이터 시점
+
+    PerformanceMetrics:
+      type: object
+      required:
+        - id
+        - period
+        - total_return
+        - sharpe_ratio
+        - max_drawdown
+        - win_rate
+        - total_trades
+        - calculated_at
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: 성과 지표 고유 ID
+        period:
+          type: string
+          enum: [1H, 1D, 1W, 1M]
+          description: 분석 기간
+        total_return:
+          type: number
+          format: float
+          description: 총 수익률 (%)
+        sharpe_ratio:
+          type: number
+          format: float
+          description: 샤프 지수
+        max_drawdown:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 100
+          description: 최대 낙폭 (%)
+        win_rate:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 100
+          description: 승률 (%)
+        profit_factor:
+          type: number
+          format: float
+          minimum: 0
+          description: 손익비
+        total_trades:
+          type: integer
+          minimum: 0
+          description: 총 거래 횟수
+        avg_trade_duration:
+          type: number
+          format: float
+          minimum: 0
+          description: 평균 거래 지속시간 (분)
+        strategy_id:
+          type: string
+          format: uuid
+          description: 전략 ID
+        calculated_at:
+          type: string
+          format: date-time
+          description: 계산 시점
+
+    Pagination:
+      type: object
+      properties:
+        limit:
+          type: integer
+          description: 페이지 크기
+        offset:
+          type: integer
+          description: 오프셋
+        total:
+          type: integer
+          description: 전체 항목 수
+        has_next:
+          type: boolean
+          description: 다음 페이지 존재 여부
+        has_prev:
+          type: boolean
+          description: 이전 페이지 존재 여부
+
+    Error:
+      type: object
+      required:
+        - success
+        - error
+        - message
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: string
+          description: 에러 코드
+        message:
+          type: string
+          description: 에러 메시지
+        details:
+          type: object
+          description: 추가 에러 정보
+
+  responses:
+    BadRequest:
+      description: 잘못된 요청
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            success: false
+            error: "BAD_REQUEST"
+            message: "잘못된 요청입니다"
+
+    NotFound:
+      description: 리소스를 찾을 수 없음
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            success: false
+            error: "NOT_FOUND"
+            message: "요청한 리소스를 찾을 수 없습니다"
+
+    ValidationError:
+      description: 유효성 검사 실패
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            success: false
+            error: "VALIDATION_ERROR"
+            message: "입력 데이터가 유효하지 않습니다"
+            details:
+              field: "confidence"
+              message: "신뢰도는 0.0과 1.0 사이의 값이어야 합니다"
+
+    InternalServerError:
+      description: 내부 서버 오류
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            success: false
+            error: "INTERNAL_SERVER_ERROR"
+            message: "서버 내부 오류가 발생했습니다"
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT 토큰을 사용한 인증
+
+security:
+  - BearerAuth: []

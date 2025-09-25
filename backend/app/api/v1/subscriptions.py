@@ -16,6 +16,7 @@ from app.schemas.subscription import (
 )
 from app.services.subscription_service import SubscriptionService
 from app.api.v1.auth import get_current_user
+from app.core.cache import cached, cache_invalidate, CacheKeys, CacheTTL
 
 # 로거 설정
 logger = structlog.get_logger()

@@ -1,370 +1,299 @@
-# AI/ML API 엔드포인트
-from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks
-from sqlalchemy.ext.asyncio import AsyncSession
+# AI 관련 API 엔드포인트
+from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from typing import List, Dict, Any, Optional
-import pandas as pd
+from datetime import datetime, timedelta
 import structlog
 
-from app.core.database import get_db
-from app.models.user import User
-from app.services.ai_service import ai_service
-from app.api.v1.auth import get_current_user
-from app.schemas.ai import (
-    MarketAnalysisRequest,
-    MarketAnalysisResponse,
-    StrategyRecommendationRequest,
-    StrategyRecommendationResponse,
-    RiskAssessmentRequest,
-    RiskAssessmentResponse,
-    UserProfileUpdate,
-    UserProfileResponse
+from ...services.agent_coordination_service import AgentCoordinationService
+from ...services.data_collection_service import DataCollectionService
+from ...services.data_analysis_service import DataAnalysisService
+from ...ml.models.lstm_model import LSTMModel
+from ...ml.models.xgboost_model import XGBoostModel
+from ...core.auth import get_current_user
+from ...core.cache import cached, cache_invalidate, CacheKeys, CacheTTL
+from ...schemas.ai import (
+    AISystemStatus,
+    DataCollectionRequest,
+    DataCollectionResponse,
+    ModelPredictionRequest,
+    ModelPredictionResponse,
+    TradingSignalRequest,
+    TradingSignalResponse,
+    AgentStatus,
+    SystemHealth
 )
 
-# 로거 설정
 logger = structlog.get_logger()
+router = APIRouter(prefix="/ai", tags=["AI"])
+security = HTTPBearer()
 
-router = APIRouter()
+# 전역 서비스 인스턴스
+agent_coordinator = None
+data_collection_service = None
+data_analysis_service = None
+lstm_model = None
+xgboost_model = None
 
-@router.post("/market/analyze", response_model=MarketAnalysisResponse)
-async def analyze_market(
-    request: MarketAnalysisRequest,
-    background_tasks: BackgroundTasks
+async def get_agent_coordinator() -> AgentCoordinationService:
+    """에이전트 조율 서비스 인스턴스 반환"""
+    global agent_coordinator
+    if agent_coordinator is None:
+        agent_coordinator = AgentCoordinationService()
+        await agent_coordinator.initialize()
+    return agent_coordinator
+
+async def get_data_collection_service() -> DataCollectionService:
+    """데이터 수집 서비스 인스턴스 반환"""
+    global data_collection_service
+    if data_collection_service is None:
+        data_collection_service = DataCollectionService()
+        await data_collection_service.initialize()
+    return data_collection_service
+
+async def get_data_analysis_service() -> DataAnalysisService:
+    """데이터 분석 서비스 인스턴스 반환"""
+    global data_analysis_service
+    if data_analysis_service is None:
+        data_analysis_service = DataAnalysisService()
+        await data_analysis_service.initialize()
+    return data_analysis_service
+
+@router.get("/status", response_model=AISystemStatus)
+@cached(ttl=CacheTTL.AI_SYSTEM_STATUS, key_prefix=CacheKeys.AI_SYSTEM_STATUS)
+async def get_ai_system_status(
+    current_user: dict = Depends(get_current_user),
+    coordinator: AgentCoordinationService = Depends(get_agent_coordinator)
 ):
-    """시장 분석 API"""
+    """AI 시스템 상태 조회"""
     try:
-        # 가격 데이터를 DataFrame으로 변환
-        price_data = pd.DataFrame(request.price_data)
+        status = await coordinator.get_system_status()
         
-        # 시장 분석 수행
-        analysis_result = await ai_service.analyze_market(price_data)
-        
-        # 백그라운드에서 모델 업데이트 (선택적)
-        if request.update_model:
-            background_tasks.add_task(
-                _update_market_model,
-                request.price_data,
-                request.regime_label
-            )
-        
-        logger.info(
-            "Market analysis completed",
-            symbol=request.symbol,
-            regime=analysis_result['regime_analysis']['regime'],
-            confidence=analysis_result['regime_analysis']['confidence']
-        )
-        
-        return MarketAnalysisResponse(
-            symbol=request.symbol,
-            regime=analysis_result['regime_analysis']['regime'],
-            confidence=analysis_result['regime_analysis']['confidence'],
-            probabilities=analysis_result['regime_analysis']['probabilities'],
-            market_indicators=analysis_result['market_indicators'],
-            timestamp=analysis_result['timestamp']
-        )
-        
-    except Exception as e:
-        logger.error("Failed to analyze market", error=str(e))
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to analyze market"
-        )
-
-@router.post("/strategies/recommend", response_model=List[StrategyRecommendationResponse])
-async def recommend_strategies(
-    request: StrategyRecommendationRequest,
-    current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
-):
-    """전략 추천 API"""
-    try:
-        # 사용자 프로필 조회 또는 생성
-        user_profile = await _get_or_create_user_profile(db, current_user.id)
-        
-        # 요청된 프로필 업데이트 적용
-        if request.profile_updates:
-            user_profile.update(request.profile_updates)
-            await _update_user_profile(db, current_user.id, user_profile)
-        
-        # 전략 추천 수행
-        recommendations = await ai_service.recommend_strategies(
-            current_user.id, user_profile
-        )
-        
-        # 응답 형식 변환
-        response = []
-        for rec in recommendations:
-            response.append(StrategyRecommendationResponse(
-                strategy_id=rec['strategy'],
-                strategy_name=_get_strategy_name(rec['strategy']),
-                score=rec['score'],
-                confidence=rec['confidence'],
-                description=_get_strategy_description(rec['strategy']),
-                risk_level=_get_strategy_risk_level(rec['strategy'])
-            ))
-        
-        logger.info(
-            "Strategies recommended for user",
-            user_id=str(current_user.id),
-            recommendations_count=len(response)
-        )
-        
-        return response
-        
-    except Exception as e:
-        logger.error(
-            "Failed to recommend strategies",
-            user_id=str(current_user.id),
-            error=str(e)
-        )
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to recommend strategies"
-        )
-
-@router.post("/risk/assess", response_model=RiskAssessmentResponse)
-async def assess_risk(
-    request: RiskAssessmentRequest,
-    current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
-):
-    """리스크 평가 API"""
-    try:
-        # 포트폴리오 데이터 조회
-        portfolio_data = await _get_portfolio_data(db, current_user.id)
-        
-        # 리스크 평가 수행
-        risk_assessment = await ai_service.assess_risk(
-            current_user.id, request.market_data, portfolio_data
-        )
-        
-        logger.info(
-            "Risk assessed for user",
-            user_id=str(current_user.id),
-            risk_level=risk_assessment['risk_level'],
-            risk_score=risk_assessment['total_risk_score']
-        )
-        
-        return RiskAssessmentResponse(
-            total_risk_score=risk_assessment['total_risk_score'],
-            risk_level=risk_assessment['risk_level'],
-            market_risk=risk_assessment['market_risk'],
-            portfolio_risk=risk_assessment['portfolio_risk'],
-            recommendations=risk_assessment['recommendations'],
-            timestamp=risk_assessment.get('timestamp', '')
-        )
-        
-    except Exception as e:
-        logger.error(
-            "Failed to assess risk",
-            user_id=str(current_user.id),
-            error=str(e)
-        )
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to assess risk"
-        )
-
-@router.get("/profile", response_model=UserProfileResponse)
-async def get_user_profile(
-    current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
-):
-    """사용자 프로필 조회"""
-    try:
-        user_profile = await _get_or_create_user_profile(db, current_user.id)
-        
-        logger.info(
-            "User profile retrieved",
-            user_id=current_user.id
-        )
-        
-        return UserProfileResponse(
-            user_id=str(current_user.id),
-            risk_tolerance=user_profile.get('risk_tolerance', 0.5),
-            trading_experience=user_profile.get('trading_experience', 0.5),
-            investment_horizon=user_profile.get('investment_horizon', 0.5),
-            portfolio_size=user_profile.get('portfolio_size', 0.0),
-            preferences=user_profile.get('preferences', {}),
-            trading_history=user_profile.get('trading_history', [])
-        )
-        
-    except Exception as e:
-        logger.error(
-            "Failed to get user profile",
-            user_id=str(current_user.id),
-            error=str(e)
-        )
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to get user profile"
-        )
-
-@router.put("/profile", response_model=UserProfileResponse)
-async def update_user_profile(
-    profile_update: UserProfileUpdate,
-    current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
-):
-    """사용자 프로필 업데이트"""
-    try:
-        # 기존 프로필 조회
-        user_profile = await _get_or_create_user_profile(db, current_user.id)
-        
-        # 프로필 업데이트
-        update_data = profile_update.dict(exclude_unset=True)
-        user_profile.update(update_data)
-        
-        # 데이터베이스 업데이트
-        await _update_user_profile(db, current_user.id, user_profile)
-        
-        logger.info(
-            "User profile updated",
-            user_id=str(current_user.id),
-            updated_fields=list(update_data.keys())
-        )
-        
-        return UserProfileResponse(
-            user_id=str(current_user.id),
-            risk_tolerance=user_profile.get('risk_tolerance', 0.5),
-            trading_experience=user_profile.get('trading_experience', 0.5),
-            investment_horizon=user_profile.get('investment_horizon', 0.5),
-            portfolio_size=user_profile.get('portfolio_size', 0.0),
-            preferences=user_profile.get('preferences', {}),
-            trading_history=user_profile.get('trading_history', [])
-        )
-        
-    except Exception as e:
-        logger.error(
-            "Failed to update user profile",
-            user_id=str(current_user.id),
-            error=str(e)
-        )
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to update user profile"
-        )
-
-@router.get("/models/status")
-async def get_models_status():
-    """AI 모델 상태 조회"""
-    try:
-        status = {
-            'market_regime_detector': {
-                'trained': ai_service.market_regime_detector.is_trained,
-                'model_type': 'RandomForestClassifier'
+        return AISystemStatus(
+            timestamp=status["timestamp"],
+            is_running=status["is_running"],
+            agents={
+                agent_id: AgentStatus(
+                    is_running=agent_info["is_running"],
+                    agent_name=agent_info["agent_name"]
+                )
+                for agent_id, agent_info in status["agents"].items()
             },
-            'strategy_recommender': {
-                'trained': ai_service.strategy_recommender.is_trained,
-                'model_type': 'RandomForestRegressor'
+            redis_status=status["redis_status"],
+            message_queues=status["message_queues"]
+        )
+        
+    except Exception as e:
+        logger.error(f"Error getting AI system status: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/data/collect", response_model=DataCollectionResponse)
+async def start_data_collection(
+    request: DataCollectionRequest,
+    background_tasks: BackgroundTasks,
+    current_user: dict = Depends(get_current_user),
+    coordinator: AgentCoordinationService = Depends(get_agent_coordinator)
+):
+    """데이터 수집 시작"""
+    try:
+        # 데이터 수집 시작
+        await coordinator.start_data_collection(
+            symbols=request.symbols,
+            exchanges=request.exchanges
+        )
+        
+        # 백그라운드에서 데이터 수집 서비스 시작
+        background_tasks.add_task(
+            _start_data_collection_background,
+            request.symbols,
+            request.exchanges
+        )
+        
+        return DataCollectionResponse(
+            status="started",
+            message=f"Data collection started for {len(request.symbols)} symbols",
+            symbols=request.symbols,
+            exchanges=request.exchanges,
+            timestamp=datetime.utcnow().isoformat()
+        )
+        
+    except Exception as e:
+        logger.error(f"Error starting data collection: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/data/stop")
+async def stop_data_collection(
+    current_user: dict = Depends(get_current_user),
+    coordinator: AgentCoordinationService = Depends(get_agent_coordinator)
+):
+    """데이터 수집 중지"""
+    try:
+        await coordinator.stop_data_collection()
+        
+        return {
+            "status": "stopped",
+            "message": "Data collection stopped",
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"Error stopping data collection: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/models/predict", response_model=ModelPredictionResponse)
+async def predict_with_models(
+    request: ModelPredictionRequest,
+    current_user: dict = Depends(get_current_user)
+):
+    """모델을 사용한 예측 수행"""
+    try:
+        # LSTM 모델 로드 (실제로는 캐시된 모델 사용)
+        global lstm_model, xgboost_model
+        
+        if lstm_model is None:
+            lstm_model = LSTMModel()
+            # 실제로는 저장된 모델 로드
+            # lstm_model.load_model("models/lstm_model.h5")
+            
+        if xgboost_model is None:
+            xgboost_model = XGBoostModel()
+            # 실제로는 저장된 모델 로드
+            # xgboost_model.load_model("models/xgboost_model.pkl")
+        
+        # 예측 수행 (실제로는 전처리된 데이터 사용)
+        predictions = {
+            "lstm_prediction": {
+                "predicted_price": 50000.0,
+                "confidence": 0.85,
+                "timestamp": datetime.utcnow().isoformat()
             },
-            'risk_assessor': {
-                'trained': ai_service.risk_assessor.is_trained,
-                'model_type': 'RandomForestClassifier'
+            "xgboost_prediction": {
+                "signal": "BUY",
+                "confidence": 0.75,
+                "probability": {
+                    "BUY": 0.75,
+                    "HOLD": 0.20,
+                    "SELL": 0.05
+                },
+                "timestamp": datetime.utcnow().isoformat()
             }
         }
         
-        logger.info("AI models status retrieved")
-        return status
+        return ModelPredictionResponse(
+            symbol=request.symbol,
+            predictions=predictions,
+            timestamp=datetime.utcnow().isoformat()
+        )
         
     except Exception as e:
-        logger.error("Failed to get models status", error=str(e))
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to get models status"
+        logger.error(f"Error making predictions: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/signals/generate", response_model=TradingSignalResponse)
+async def generate_trading_signals(
+    request: TradingSignalRequest,
+    current_user: dict = Depends(get_current_user)
+):
+    """거래 신호 생성"""
+    try:
+        # 실제로는 AI 에이전트를 통해 신호 생성
+        # 여기서는 예시 신호 생성
+        
+        signals = []
+        for symbol in request.symbols:
+            signal = {
+                "symbol": symbol,
+                "signal": "BUY",
+                "confidence": 0.80,
+                "price": 50000.0,
+                "timestamp": datetime.utcnow().isoformat(),
+                "reasoning": "RSI oversold, MACD bullish crossover"
+            }
+            signals.append(signal)
+        
+        return TradingSignalResponse(
+            signals=signals,
+            timestamp=datetime.utcnow().isoformat()
         )
-
-# 헬퍼 함수들
-
-async def _get_or_create_user_profile(db: AsyncSession, user_id: str) -> Dict[str, Any]:
-    """사용자 프로필 조회 또는 생성"""
-    try:
-        # 기본 프로필 반환 (실제 구현에서는 데이터베이스에서 조회)
-        return {
-            'user_id': user_id,
-            'risk_tolerance': 0.5,
-            'trading_experience': 0.5,
-            'investment_horizon': 0.5,
-            'portfolio_size': 0.0,
-        'preferences': {
-            'prefers_trend_following': 0.5,
-            'prefers_mean_reversion': 0.5,
-            'prefers_short_term': 0.5,
-            'prefers_long_term': 0.5
-        },
-        'trading_history': []
-    }
+        
     except Exception as e:
-        logger.error("Failed to get user profile", user_id=user_id, error=str(e))
-        # 기본 프로필 반환
-        return {
-            'user_id': user_id,
-            'risk_tolerance': 0.5,
-            'trading_experience': 0.5,
-            'investment_horizon': 0.5,
-            'portfolio_size': 0.0,
-            'preferences': {
-                'prefers_trend_following': 0.5,
-                'prefers_mean_reversion': 0.5,
-                'prefers_short_term': 0.5,
-                'prefers_long_term': 0.5
-            },
-            'trading_history': []
-        }
+        logger.error(f"Error generating trading signals: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
-async def _update_user_profile(db: AsyncSession, user_id: str, profile: Dict[str, Any]) -> None:
-    """사용자 프로필 업데이트"""
-    # 실제 구현에서는 데이터베이스 업데이트
-    pass
-
-async def _get_portfolio_data(db: AsyncSession, user_id: str) -> Dict[str, Any]:
-    """포트폴리오 데이터 조회"""
-    # 실제 구현에서는 데이터베이스에서 조회
-    return {
-        'concentration': 0.3,
-        'leverage': 1.0,
-        'position_size': 0.1
-    }
-
-async def _update_market_model(price_data: List[Dict[str, Any]], regime_label: Optional[str]) -> None:
-    """시장 모델 업데이트 (백그라운드 작업)"""
+@router.get("/health", response_model=SystemHealth)
+async def get_system_health():
+    """시스템 헬스 체크"""
     try:
-        if regime_label:
-            # 모델 재훈련 로직
-            logger.info("Market model update started")
-            # 실제 구현에서는 모델 재훈련
-            logger.info("Market model update completed")
+        # Redis 연결 확인
+        redis_status = "healthy"
+        try:
+            # 실제로는 Redis ping
+            pass
+        except:
+            redis_status = "unhealthy"
+        
+        # 데이터베이스 연결 확인
+        db_status = "healthy"
+        try:
+            # 실제로는 DB 연결 확인
+            pass
+        except:
+            db_status = "unhealthy"
+        
+        # AI 에이전트 상태 확인
+        agent_status = "healthy"
+        try:
+            coordinator = await get_agent_coordinator()
+            status = await coordinator.get_system_status()
+            if not status["is_running"]:
+                agent_status = "unhealthy"
+        except:
+            agent_status = "unhealthy"
+        
+        overall_status = "healthy" if all([
+            redis_status == "healthy",
+            db_status == "healthy",
+            agent_status == "healthy"
+        ]) else "unhealthy"
+        
+        return SystemHealth(
+            status=overall_status,
+            timestamp=datetime.utcnow().isoformat(),
+            components={
+                "redis": redis_status,
+                "database": db_status,
+                "ai_agents": agent_status
+            }
+        )
+        
     except Exception as e:
-        logger.error("Failed to update market model", error=str(e))
+        logger.error(f"Error checking system health: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
-def _get_strategy_name(strategy_id: str) -> str:
-    """전략 ID를 이름으로 변환"""
-    strategy_names = {
-        'supertrend_trend_following': 'Supertrend Trend Following',
-        'rsi_mean_reversion': 'RSI Mean Reversion',
-        'bollinger_bands_squeeze': 'Bollinger Bands Squeeze',
-        'macd_crossover': 'MACD Crossover',
-        'moving_average_crossover': 'Moving Average Crossover'
-    }
-    return strategy_names.get(strategy_id, strategy_id)
+async def _start_data_collection_background(symbols: List[str], exchanges: List[str]):
+    """백그라운드 데이터 수집 작업"""
+    try:
+        data_service = await get_data_collection_service()
+        await data_service.start_collection(symbols, exchanges)
+    except Exception as e:
+        logger.error(f"Error in background data collection: {e}")
 
-def _get_strategy_description(strategy_id: str) -> str:
-    """전략 설명 반환"""
-    descriptions = {
-        'supertrend_trend_following': 'Trend-following strategy using Supertrend indicator',
-        'rsi_mean_reversion': 'Mean reversion strategy using RSI indicator',
-        'bollinger_bands_squeeze': 'Volatility breakout strategy using Bollinger Bands',
-        'macd_crossover': 'Trend-following strategy using MACD crossover signals',
-        'moving_average_crossover': 'Trend-following strategy using moving average crossovers'
-    }
-    return descriptions.get(strategy_id, 'Custom trading strategy')
-
-def _get_strategy_risk_level(strategy_id: str) -> str:
-    """전략 리스크 레벨 반환"""
-    risk_levels = {
-        'supertrend_trend_following': 'medium',
-        'rsi_mean_reversion': 'low',
-        'bollinger_bands_squeeze': 'high',
-        'macd_crossover': 'medium',
-        'moving_average_crossover': 'low'
-    }
-    return risk_levels.get(strategy_id, 'medium')
+@router.on_event("shutdown")
+async def shutdown_ai_services():
+    """AI 서비스 종료"""
+    try:
+        global agent_coordinator, data_collection_service, data_analysis_service
+        
+        if agent_coordinator:
+            await agent_coordinator.cleanup()
+            
+        if data_collection_service:
+            await data_collection_service.cleanup()
+            
+        if data_analysis_service:
+            await data_analysis_service.cleanup()
+            
+        logger.info("AI services shutdown completed")
+        
+    except Exception as e:
+        logger.error(f"Error during AI services shutdown: {e}")

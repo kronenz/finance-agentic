@@ -33,8 +33,8 @@ class LoggingMiddleware(BaseHTTPMiddleware):
                 # JWT 토큰에서 사용자 ID 추출 (간단한 예시)
                 # 실제로는 JWT 토큰을 디코딩해야 함
                 user_id = "extracted_from_token"
-            except Exception:
-                pass
+            except Exception as e:
+                self.logger.warning("Could not extract user ID from token", error=str(e))
         
         # 요청 로그
         self.logger.info(

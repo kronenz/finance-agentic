@@ -1,0 +1,49 @@
+# AI/ML 전용 Docker 이미지
+FROM python:3.11-slim
+
+# 시스템 패키지 업데이트 및 필수 도구 설치
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    curl \
+    software-properties-common \
+    git \
+    && rm -rf /var/lib/apt/lists/*
+
+# CUDA 지원을 위한 NVIDIA 런타임 설치 (선택사항)
+# RUN curl -fsSL https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/cuda-keyring_1.0-1_all.deb -o cuda-keyring.deb && \
+#     dpkg -i cuda-keyring.deb && \
+#     apt-get update && \
+#     apt-get install -y cuda-runtime-11-8
+
+# 작업 디렉토리 설정
+WORKDIR /app
+
+# Python 의존성 파일 복사
+COPY requirements-ai.txt .
+
+# Python 의존성 설치
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements-ai.txt
+
+# Jupyter Lab 설정
+RUN jupyter lab --generate-config && \
+    echo "c.ServerApp.ip = '0.0.0.0'" >> /root/.jupyter/jupyter_lab_config.py && \
+    echo "c.ServerApp.port = 8888" >> /root/.jupyter/jupyter_lab_config.py && \
+    echo "c.ServerApp.allow_root = True" >> /root/.jupyter/jupyter_lab_config.py && \
+    echo "c.ServerApp.open_browser = False" >> /root/.jupyter/jupyter_lab_config.py
+
+# 애플리케이션 코드 복사
+COPY . .
+
+# AI 에이전트 디렉토리 생성
+RUN mkdir -p /app/agents /app/ml /app/notebooks /app/data
+
+# 포트 노출
+EXPOSE 8888 8000
+
+# Jupyter Lab 시작 스크립트
+COPY scripts/start-ai.sh /usr/local/bin/start-ai.sh
+RUN chmod +x /usr/local/bin/start-ai.sh
+
+# 기본 명령어
+CMD ["/usr/local/bin/start-ai.sh"]

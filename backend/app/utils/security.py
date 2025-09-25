@@ -11,17 +11,7 @@ from app.core.config import settings
 # 비밀번호 해싱 컨텍스트
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
-    """JWT 액세스 토큰 생성"""
-    to_encode = data.copy()
-    if expires_delta:
-        expire = datetime.utcnow() + expires_delta
-    else:
-        expire = datetime.utcnow() + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
-    
-    to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
-    return encoded_jwt
+
 
 def create_refresh_token(data: dict) -> str:
     """JWT 리프레시 토큰 생성"""
@@ -47,10 +37,9 @@ def get_password_hash(password: str) -> str:
     """비밀번호 해싱"""
     return pwd_context.hash(password)
 
-def generate_verification_code() -> str:
-    """6자리 인증 코드 생성"""
-    import random
-    return str(random.randint(100000, 999999))
+def generate_random_string(length: int = 6) -> str:
+    """Generate a random string of a given length."""
+    return secrets.token_hex(length // 2)
 
 def generate_api_key() -> str:
     """API 키 생성"""

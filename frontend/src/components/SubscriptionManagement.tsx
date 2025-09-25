@@ -1,69 +1,66 @@
 // 구독 관리 컴포넌트
 import React, { useState, useEffect } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
+import toast from 'react-hot-toast';
 import { RootState } from '../store';
 import { SubscriptionResponse } from '../types/subscription';
+import { 
+  fetchUserSubscription,
+  cancelCurrentUserSubscription,
+  reactivateUserSubscription,
+  selectUserSubscription,
+  selectSubscriptionStatus,
+  selectSubscriptionError,
+  selectIsLoading,
+  selectHasError,
+  clearError
+} from '../store/slices/subscriptionSlice';
+import { SubscriptionManagementSkeleton } from './ui/SkeletonLoader';
+import ConfirmationModal from './ui/ConfirmationModal';
 
 const SubscriptionManagement: React.FC = () => {
-  const [subscription, setSubscription] = useState<SubscriptionResponse | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const dispatch = useDispatch();
   const [showCancelModal, setShowCancelModal] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const { user } = useSelector((state: RootState) => state.auth);
+  
+  // Redux 상태 구독
+  const subscription = useSelector(selectUserSubscription);
+  const status = useSelector(selectSubscriptionStatus);
+  const error = useSelector(selectSubscriptionError);
+  const isLoading = useSelector(selectIsLoading);
+  const hasError = useSelector(selectHasError);
 
   useEffect(() => {
     if (user) {
-      fetchActiveSubscription();
+      dispatch(fetchUserSubscription());
     }
-  }, [user]);
+  }, [user, dispatch]);
 
-  const fetchActiveSubscription = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch('/api/v1/subscriptions/active', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
-      
-      if (!response.ok) {
-        if (response.status === 404) {
-          setSubscription(null);
-          return;
-        }
-        throw new Error('Failed to fetch subscription');
-      }
-      
-      const data = await response.json();
-      setSubscription(data);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
-    } finally {
-      setLoading(false);
+  // 에러 초기화
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => {
+        dispatch(clearError());
+      }, 5000);
+      return () => clearTimeout(timer);
     }
-  };
+  }, [error, dispatch]);
 
   const handleCancelSubscription = async () => {
     if (!subscription) return;
     
     try {
-      const response = await fetch(`/api/v1/subscriptions/${subscription.id}/cancel`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to cancel subscription');
-      }
-      
+      setIsProcessing(true);
+      await dispatch(cancelCurrentUserSubscription(subscription.id)).unwrap();
       setShowCancelModal(false);
-      await fetchActiveSubscription();
+      toast.success('구독이 성공적으로 취소되었습니다.');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      console.error('Cancel subscription failed:', err);
+      toast.error('구독 취소 중 오류가 발생했습니다. 다시 시도해주세요.');
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -71,21 +68,14 @@ const SubscriptionManagement: React.FC = () => {
     if (!subscription) return;
     
     try {
-      const response = await fetch(`/api/v1/subscriptions/${subscription.id}/reactivate`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to reactivate subscription');
-      }
-      
-      await fetchActiveSubscription();
+      setIsProcessing(true);
+      await dispatch(reactivateUserSubscription(subscription.id)).unwrap();
+      toast.success('구독이 성공적으로 재활성화되었습니다.');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      console.error('Reactivate subscription failed:', err);
+      toast.error('구독 재활성화 중 오류가 발생했습니다. 다시 시도해주세요.');
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -112,23 +102,19 @@ const SubscriptionManagement: React.FC = () => {
     });
   };
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center py-12">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-      </div>
-    );
+  if (isLoading) {
+    return <SubscriptionManagementSkeleton />;
   }
 
-  if (error) {
+  if (hasError && error) {
     return (
       <div className="text-center py-12">
-        <p className="text-red-600 mb-4">Error: {error}</p>
+        <p className="text-red-600 mb-4">오류: {error}</p>
         <button
-          onClick={fetchActiveSubscription}
+          onClick={() => dispatch(fetchUserSubscription())}
           className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
         >
-          Try Again
+          다시 시도
         </button>
       </div>
     );
@@ -217,26 +203,28 @@ const SubscriptionManagement: React.FC = () => {
               {subscription.status === 'active' && (
                 <button
                   onClick={() => setShowCancelModal(true)}
-                  className="w-full px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+                  disabled={isProcessing}
+                  className="w-full px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
-                  Cancel Subscription
+                  구독 취소
                 </button>
               )}
               
               {subscription.status === 'cancelled' && (
                 <button
                   onClick={handleReactivateSubscription}
-                  className="w-full px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+                  disabled={isProcessing}
+                  className="w-full px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
-                  Reactivate Subscription
+                  {isProcessing ? '재활성화 중...' : '구독 재활성화'}
                 </button>
               )}
               
               <button
                 onClick={() => window.location.href = '/subscription/plans'}
-                className="w-full px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700"
+                className="w-full px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
               >
-                Change Plan
+                플랜 변경
               </button>
             </div>
           </div>
@@ -256,32 +244,17 @@ const SubscriptionManagement: React.FC = () => {
       </div>
 
       {/* Cancel Confirmation Modal */}
-      {showCancelModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">
-              Cancel Subscription
-            </h3>
-            <p className="text-gray-600 mb-6">
-              Are you sure you want to cancel your subscription? This action cannot be undone.
-            </p>
-            <div className="flex space-x-3">
-              <button
-                onClick={() => setShowCancelModal(false)}
-                className="flex-1 px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
-              >
-                Keep Subscription
-              </button>
-              <button
-                onClick={handleCancelSubscription}
-                className="flex-1 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
-              >
-                Cancel Subscription
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmationModal
+        isOpen={showCancelModal}
+        onClose={() => setShowCancelModal(false)}
+        onConfirm={handleCancelSubscription}
+        title="구독 취소"
+        message="정말로 구독을 취소하시겠습니까? 이 작업은 되돌릴 수 없습니다."
+        confirmText="구독 취소"
+        cancelText="구독 유지"
+        confirmButtonColor="red"
+        isLoading={isProcessing}
+      />
     </div>
   );
 };

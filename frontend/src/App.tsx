@@ -1,47 +1,28 @@
-/**
- * 메인 App 컴포넌트
- */
-
-// import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import React from 'react';
 import { Provider } from 'react-redux';
-import { store } from './store';
-import LoginForm from './components/LoginForm';
-import RegisterForm from './components/RegisterForm';
-import Dashboard from './components/Dashboard';
-import ProtectedRoute from './components/ProtectedRoute';
-// import './App.css';
+import { store } from './store/store';
+import TradingDashboard from './components/trading/TradingDashboard';
+import SignalMonitoring from './components/monitoring/SignalMonitoring';
+import RiskDashboard from './components/risk/RiskDashboard';
+import VwapChart from './components/charts/VwapChart';
+import VolumeProfileChart from './components/charts/VolumeProfileChart';
 
-function App() {
+const App: React.FC = () => {
   return (
     <Provider store={store}>
-      <Router>
-        <div className="App">
-          <Routes>
-            {/* 공개 라우트 */}
-            <Route path="/login" element={<LoginForm />} />
-            <Route path="/register" element={<RegisterForm />} />
-            
-            {/* 보호된 라우트 */}
-            <Route
-              path="/dashboard"
-              element={
-                <ProtectedRoute>
-                  <Dashboard />
-                </ProtectedRoute>
-              }
-            />
-            
-            {/* 기본 리다이렉트 */}
-            <Route path="/" element={<Navigate to="/dashboard" replace />} />
-            
-            {/* 404 페이지 */}
-            <Route path="*" element={<Navigate to="/dashboard" replace />} />
-          </Routes>
+      <div className="bg-gray-900 min-h-screen">
+        <TradingDashboard />
+        <div className="p-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <VwapChart />
+            <VolumeProfileChart />
+          </div>
         </div>
-      </Router>
+        <SignalMonitoring />
+        <RiskDashboard />
+      </div>
     </Provider>
   );
-}
+};
 
 export default App;

@@ -1,0 +1,76 @@
+# AI/ML 핵심 라이브러리
+numpy==1.24.3
+pandas==2.0.3
+scikit-learn==1.3.0
+scipy==1.11.1
+
+# 딥러닝 프레임워크
+tensorflow==2.13.0
+torch==2.0.1
+torchvision==0.15.2
+torchaudio==2.0.2
+
+# 시계열 분석
+statsmodels==0.14.0
+arch==6.2.0
+ta==0.10.2
+
+# 금융 데이터 처리
+ccxt==4.0.77
+yfinance==0.2.18
+alpha-vantage==2.3.1
+
+# 데이터 시각화
+matplotlib==3.7.2
+seaborn==0.12.2
+plotly==5.15.0
+bokeh==3.2.2
+
+# Jupyter 환경
+jupyter==1.0.0
+jupyterlab==4.0.7
+ipywidgets==8.0.7
+notebook==6.5.4
+
+# 데이터베이스 및 캐싱
+redis==4.6.0
+sqlalchemy==2.0.19
+psycopg2-binary==2.9.7
+
+# API 및 웹 프레임워크
+fastapi==0.101.1
+uvicorn==0.23.2
+requests==2.31.0
+aiohttp==3.8.5
+
+# 메시지 큐
+celery==5.3.1
+kombu==5.3.1
+
+# 모니터링 및 로깅
+prometheus-client==0.17.1
+structlog==23.1.0
+
+# 유틸리티
+python-dotenv==1.0.0
+pydantic==2.1.1
+click==8.1.7
+tqdm==4.65.0
+
+# 백테스팅
+backtrader==1.9.78.123
+zipline-reloaded==2.2.0
+
+# 최적화
+optuna==3.2.0
+hyperopt==0.2.7
+
+# 자연어 처리 (뉴스 분석용)
+nltk==3.8.1
+textblob==0.17.1
+vaderSentiment==3.3.2
+
+# 기타 유용한 라이브러리
+joblib==1.3.2
+dask==2023.7.0
+xarray==2023.6.0
