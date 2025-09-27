@@ -4,13 +4,13 @@ pydantic==2.5.0
 pyyaml==6.0.1
 
 # Trading and data
-ccxt==4.5.5
-pandas==2.1.4
-numpy==1.24.3
-ta-lib==0.4.28
+ccxt==4.5.6
+pandas>=2.1.4
+numpy>=1.24.3
+# ta-lib==0.4.28  # 설치 어려움으로 주석 처리, ta 패키지 사용
 
 # Database
-sqlite3
+# sqlite3  # Python 내장 모듈이므로 제거
 
 # Logging and monitoring
 rich==13.7.0
@@ -32,3 +32,6 @@ websocket-client==1.6.4
 
 # Configuration
 python-decouple==3.8
+
+# Technical Analysis (ta-lib 대안)
+ta>=0.10.2
