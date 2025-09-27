@@ -84,7 +84,8 @@ finance/
 - **scikit-learn**: 머신러닝 라이브러리
 - **pandas**: 데이터 분석 및 처리
 - **numpy**: 수치 계산
-- **python-binance**: 암호화폐 거래소 API
+- **ccxt 4.5.6**: 암호화폐 거래소 통합 API (최신 안정 버전)
+- **ta**: 기술적 분석 라이브러리 (ta-lib 대안)
 
 ### DevOps & Infrastructure
 - **Docker**: 컨테이너화
@@ -133,9 +134,40 @@ finance/
 
 ## 시작하기
 
-1. 환경 설정: `pip install -r requirements.txt`
-2. 설정 파일 구성: `config/config.yaml` 수정
-3. 개발 서버 실행: `python src/main.py`
+### 1. 환경 설정
+```bash
+# 가상환경 생성
+python3 -m venv venv
+
+# 가상환경 활성화
+source venv/bin/activate  # Linux/Mac
+# 또는
+venv\Scripts\activate     # Windows
+
+# 패키지 설치
+pip install -r requirements.txt
+```
+
+### 2. 설정 파일 구성
+`config/config.yaml` 수정
+
+### 3. 개발 서버 실행
+```bash
+# 백엔드 서버
+python src/main.py
+
+# 프론트엔드 서버 (포트 5000)
+cd frontend && npm run dev
+
+# 대체 서버 (포트 9000)
+cd frontend && python3 -m http.server 9000
+```
+
+### 4. 패키지 버전 정보
+- **ccxt**: 4.5.6 (최신 안정 버전)
+- **ta**: >= 0.10.2 (ta-lib 대안)
+- **pandas**: >= 2.1.4
+- **numpy**: >= 1.24.3
 
 ## 기여 가이드
 
