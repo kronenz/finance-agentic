@@ -1,6 +1,6 @@
 # AI 기반 암호화폐 자동화 거래 시스템 Dockerfile
 
-FROM python:3.11-slim
+FROM python:3.12-slim
 
 # 작업 디렉토리 설정
 WORKDIR /app

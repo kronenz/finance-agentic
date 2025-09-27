@@ -72,6 +72,7 @@ finance/
 - **CSS3**: Apple 스타일 커스텀 스타일링
 
 ### Backend
+- **Python 3.12**: 최신 Python 버전 사용
 - **FastAPI**: 고성능 Python 웹 프레임워크
 - **PostgreSQL**: 관계형 데이터베이스
 - **SQLAlchemy**: ORM (Object-Relational Mapping)
@@ -163,11 +164,14 @@ cd frontend && npm run dev
 cd frontend && python3 -m http.server 9000
 ```
 
-### 4. 패키지 버전 정보
-- **ccxt**: 4.5.6 (최신 안정 버전)
+### 4. 패키지 버전 정보 (Python 3.12 최적화)
+- **Python**: 3.12.3 (최신 안정 버전)
+- **ccxt**: >= 4.5.6 (최신 안정 버전)
 - **ta**: >= 0.10.2 (ta-lib 대안)
 - **pandas**: >= 2.1.4
 - **numpy**: >= 1.24.3
+- **fastapi**: >= 0.104.1
+- **pydantic**: >= 2.5.0
 
 ## 기여 가이드
 

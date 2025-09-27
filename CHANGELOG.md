@@ -5,20 +5,26 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Fixed
+- **Python 3.12 최적화**: 모든 Dockerfile과 requirements.txt를 Python 3.12로 업데이트
 - **ccxt 버전 업데이트**: 4.5.5 → 4.5.6으로 업데이트하여 패키지 호환성 문제 해결
 - **ta-lib 대안 제공**: 설치 어려운 ta-lib 대신 ta 패키지 사용
 - **의존성 유연성 개선**: pandas, numpy 버전을 유연하게 설정 (>=)
 - **불필요한 패키지 제거**: sqlite3 (Python 내장 모듈) 제거
 
 ### Changed
+- **Python 3.12 마이그레이션**: 모든 Dockerfile과 requirements.txt를 Python 3.12로 업데이트
 - **requirements.txt 최적화**: 패키지 설치 오류 해결을 위한 버전 조정
 - **.gitignore 업데이트**: node_modules 및 프론트엔드 빌드 파일 제외
+- **Docker 이미지 업데이트**: python:3.11-slim → python:3.12-slim
 
 ### Technical Details
-- **ccxt 4.5.6**: 최신 안정 버전으로 업데이트
+- **Python 3.12.3**: 최신 안정 버전으로 업데이트
+- **ccxt >= 4.5.6**: 최신 안정 버전으로 업데이트
 - **ta >= 0.10.2**: ta-lib의 대안으로 사용
 - **pandas >= 2.1.4**: 유연한 버전 관리
 - **numpy >= 1.24.3**: 유연한 버전 관리
+- **fastapi >= 0.104.1**: Python 3.12 최적화
+- **pydantic >= 2.5.0**: Python 3.12 최적화
 
 ### Installation
 ```bash

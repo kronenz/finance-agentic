@@ -1,10 +1,10 @@
-# Core dependencies
-python-dotenv==1.0.0
-pydantic==2.5.0
-pyyaml==6.0.1
+# Core dependencies (Python 3.12 optimized)
+python-dotenv>=1.0.0
+pydantic>=2.5.0
+pyyaml>=6.0.1
 
-# Trading and data
-ccxt==4.5.6
+# Trading and data (Python 3.12 optimized)
+ccxt>=4.5.6
 pandas>=2.1.4
 numpy>=1.24.3
 # ta-lib==0.4.28  # 설치 어려움으로 주석 처리, ta 패키지 사용
@@ -12,26 +12,29 @@ numpy>=1.24.3
 # Database
 # sqlite3  # Python 내장 모듈이므로 제거
 
-# Logging and monitoring
-rich==13.7.0
-schedule==1.2.0
+# Logging and monitoring (Python 3.12 optimized)
+rich>=13.7.0
+schedule>=1.2.0
 
-# Testing
-pytest==7.4.3
-pytest-cov==4.1.0
-pytest-mock==3.12.0
+# Testing (Python 3.12 optimized)
+pytest>=7.4.3
+pytest-cov>=4.1.0
+pytest-mock>=3.12.0
 
-# Development
-black==23.12.0
-flake8==6.1.0
-mypy==1.7.1
+# Development (Python 3.12 optimized)
+black>=23.12.0
+flake8>=6.1.0
+mypy>=1.7.1
 
-# API and web
-requests==2.31.0
-websocket-client==1.6.4
+# API and web (Python 3.12 optimized)
+requests>=2.31.0
+websocket-client>=1.6.4
 
-# Configuration
-python-decouple==3.8
+# Configuration (Python 3.12 optimized)
+python-decouple>=3.8
 
-# Technical Analysis (ta-lib 대안)
+# Technical Analysis (ta-lib 대안, Python 3.12 optimized)
 ta>=0.10.2
+
+# Python 3.12 specific optimizations
+typing-extensions>=4.0.0
