@@ -208,3 +208,17 @@ class AuthService:
             return await self.get_user_by_id(user_id)
         except JWTError:
             return None
+
+    async def get_user_by_username(self, username: str) -> Optional[User]:
+        """사용자명으로 사용자 조회"""
+        result = await self.db.execute(
+            select(User).where(User.username == username)
+        )
+        return result.scalar_one_or_none()
+
+
+# 전역 함수들 (기존 코드와의 호환성을 위해)
+async def get_user_by_username(username: str, db: AsyncSession) -> Optional[User]:
+    """사용자명으로 사용자 조회 (전역 함수)"""
+    auth_service = AuthService(db)
+    return await auth_service.get_user_by_username(username)

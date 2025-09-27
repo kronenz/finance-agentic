@@ -4,10 +4,10 @@ JWT based authentication system.
 from datetime import datetime, timedelta
 from typing import Optional
 
-import jwt
+from jose import jwt
 from fastapi import Depends, HTTPException, Security
 from fastapi.security import SecurityScopes
-from jwt import PyJWTError
+from jose.exceptions import JWTError
 from pydantic import BaseModel
 from starlette.status import HTTP_403_FORBIDDEN, HTTP_401_UNAUTHORIZED
 from fastapi.security import OAuth2PasswordBearer
@@ -59,7 +59,7 @@ async def get_current_user(security_scopes: SecurityScopes, token: str = Depends
             raise credentials_exception
         token_scopes = payload.get("scopes", [])
         token_data = TokenData(scopes=token_scopes, username=username)
-    except PyJWTError:
+    except JWTError:
         raise credentials_exception
     user = await get_user_by_username(username=token_data.username)
     if user is None:

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 
 const Alerts: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error] = useState<string | null>(null);
 
   useEffect(() => {
     // Simulate data fetching

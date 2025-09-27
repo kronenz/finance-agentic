@@ -102,12 +102,12 @@ def require_all_permissions_dependency(permissions: list[Permission]):
     return permission_checker
 
 # 일반적인 권한 의존성들
-require_trade_read = require_permission_dependency(Permission.TRADE_READ)
-require_trade_write = require_permission_dependency(Permission.TRADE_CREATE)
-require_position_read = require_permission_dependency(Permission.POSITION_READ)
-require_position_write = require_permission_dependency(Permission.POSITION_CREATE)
-require_strategy_read = require_permission_dependency(Permission.STRATEGY_READ)
-require_strategy_write = require_permission_dependency(Permission.STRATEGY_CREATE)
+require_trade_read = require_permission_dependency(Permission.TRADES_READ)
+require_trade_write = require_permission_dependency(Permission.TRADES_WRITE)
+require_user_read = require_permission_dependency(Permission.USERS_READ)
+require_user_write = require_permission_dependency(Permission.USERS_WRITE)
+require_monitoring_read = require_permission_dependency(Permission.MONITORING_READ)
+require_monitoring_write = require_permission_dependency(Permission.MONITORING_WRITE)
 require_ai_agent_read = require_permission_dependency(Permission.AI_AGENT_READ)
 require_ai_agent_control = require_permission_dependency(Permission.AI_AGENT_CONTROL)
 require_risk_read = require_permission_dependency(Permission.RISK_READ)

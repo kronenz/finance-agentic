@@ -12,6 +12,8 @@ services:
       - ENVIRONMENT=development
       - DEBUG=true
       - LOG_LEVEL=DEBUG
+    ports:
+      - "8000:8000"
     volumes:
       - ./backend:/app
       - /app/__pycache__
@@ -24,10 +26,12 @@ services:
     environment:
       - REACT_APP_API_URL=http://localhost:8000
       - CHOKIDAR_USEPOLLING=true
+    ports:
+      - "3000:3000"
     volumes:
       - ./frontend:/app
       - /app/node_modules
-    command: npm start
+    command: npm run dev
 
   # 개발용 데이터베이스 (더 작은 리소스)
   postgres:

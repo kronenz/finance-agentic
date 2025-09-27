@@ -4,8 +4,8 @@ from pydantic import BaseModel, Field
 from typing import Optional
 
 # This is a placeholder. In a real app, these would be properly managed instances.
-from backend.app.trading.execution_engine import TradingExecutionEngine
-from backend.app.trading.position_manager import PositionManager
+from app.trading.execution_engine import TradingExecutionEngine
+from app.trading.position_manager import PositionManager
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')

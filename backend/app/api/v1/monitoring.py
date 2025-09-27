@@ -4,7 +4,7 @@ from typing import List, Dict, Any, Optional
 from datetime import datetime, timedelta
 import structlog
 
-from ...core.auth import get_current_user
+from ...auth.dependencies import get_current_user
 from ...schemas.monitoring import (
     MetricsRequest,
     MetricsResponse,

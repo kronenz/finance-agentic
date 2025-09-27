@@ -5,6 +5,7 @@
 from datetime import datetime, timedelta
 from fastapi import Request, Response, HTTPException, Depends
 import uuid
+from typing import Optional
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db

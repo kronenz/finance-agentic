@@ -36,6 +36,7 @@ class User(Base):
     # 관계
     subscriptions = relationship("Subscription", back_populates="user", cascade="all, delete-orphan")
     social_logins = relationship("UserSocialLogin", back_populates="user", cascade="all, delete-orphan")
+    sessions = relationship("Session", back_populates="user", cascade="all, delete-orphan")
 
 class UserSocialLogin(Base):
     """사용자 소셜 로그인 모델"""

@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from app.api.v1 import trading, analysis, monitoring
+from app.api.v1 import trading, monitoring
 from app.auth.main import router as auth_router
 from app.core.config import settings
 from app.middleware.security import setup_all_middleware
@@ -15,7 +15,6 @@ setup_all_middleware(app)
 
 # API 라우터 등록
 app.include_router(trading.router, prefix="/api/v1/trading", tags=["trading"])
-app.include_router(analysis.router, prefix="/api/v1/analysis", tags=["analysis"])
 app.include_router(monitoring.router, prefix="/api/v1/monitoring", tags=["monitoring"])
 app.include_router(auth_router, prefix="/auth", tags=["auth"])
 

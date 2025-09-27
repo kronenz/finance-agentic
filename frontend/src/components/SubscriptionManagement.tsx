@@ -1,15 +1,16 @@
 // 구독 관리 컴포넌트
 import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
+import { AppDispatch } from '../store';
 import toast from 'react-hot-toast';
-import { RootState } from '../store';
-import { SubscriptionResponse } from '../types/subscription';
+// import { RootState } from '../store';
+// import { SubscriptionResponse } from '../types/subscription'; // 사용하지 않음
 import { 
   fetchUserSubscription,
   cancelCurrentUserSubscription,
   reactivateUserSubscription,
   selectUserSubscription,
-  selectSubscriptionStatus,
+  // selectSubscriptionStatus, // 사용하지 않음
   selectSubscriptionError,
   selectIsLoading,
   selectHasError,
@@ -19,15 +20,16 @@ import { SubscriptionManagementSkeleton } from './ui/SkeletonLoader';
 import ConfirmationModal from './ui/ConfirmationModal';
 
 const SubscriptionManagement: React.FC = () => {
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const { user } = useSelector((state: RootState) => state.auth);
+  // const { user } = useSelector((state: RootState) => state.auth);
+  const user = null;
   
   // Redux 상태 구독
   const subscription = useSelector(selectUserSubscription);
-  const status = useSelector(selectSubscriptionStatus);
+  // const status = useSelector(selectSubscriptionStatus); // 사용하지 않음
   const error = useSelector(selectSubscriptionError);
   const isLoading = useSelector(selectIsLoading);
   const hasError = useSelector(selectHasError);

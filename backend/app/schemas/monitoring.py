@@ -3,6 +3,9 @@ from pydantic import BaseModel, Field
 from typing import List, Dict, Any, Optional, Literal
 from datetime import datetime
 
+# 알림 상태 열거형
+AlertStatus = Literal["active", "resolved", "acknowledged", "suppressed"]
+
 class MetricsRequest(BaseModel):
     """메트릭 요청"""
     start_time: Optional[str] = Field(None, description="시작 시간")

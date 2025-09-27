@@ -1,14 +1,15 @@
 // 구독 플랜 선택 컴포넌트
 import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
+import { AppDispatch } from '../store';
 import toast from 'react-hot-toast';
-import { RootState } from '../store';
-import { SubscriptionPlanResponse } from '../types/subscription';
+// import { RootState } from '../store'; // 사용하지 않음
+// import { SubscriptionPlanResponse } from '../types/subscription'; // 사용하지 않음
 import { 
   fetchSubscriptionPlans, 
   subscribeToPlan,
   selectSubscriptionPlans,
-  selectSubscriptionStatus,
+  // selectSubscriptionStatus, // 사용하지 않음
   selectSubscriptionError,
   selectIsLoading,
   selectHasError,
@@ -27,12 +28,12 @@ const SubscriptionPlans: React.FC<SubscriptionPlansProps> = ({
   selectedPlanId,
   onSubscribe
 }) => {
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const [subscribing, setSubscribing] = useState<string | null>(null);
 
   // Redux 상태 구독
   const plans = useSelector(selectSubscriptionPlans);
-  const status = useSelector(selectSubscriptionStatus);
+  // const status = useSelector(selectSubscriptionStatus); // 사용하지 않음
   const error = useSelector(selectSubscriptionError);
   const isLoading = useSelector(selectIsLoading);
   const hasError = useSelector(selectHasError);

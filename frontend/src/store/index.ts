@@ -1,23 +1,16 @@
-/**
- * Redux 스토어 설정
- */
-
 import { configureStore } from '@reduxjs/toolkit';
-import authReducer from './authSlice';
-import subscriptionReducer from './slices/subscriptionSlice';
+import { setupListeners } from '@reduxjs/toolkit/query';
+import { api } from './api';
 
 export const store = configureStore({
   reducer: {
-    auth: authReducer,
-    subscription: subscriptionReducer,
+    [api.reducerPath]: api.reducer,
   },
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware({
-      serializableCheck: {
-        ignoredActions: ['persist/PERSIST'],
-      },
-    }),
+    getDefaultMiddleware().concat(api.middleware),
 });
+
+setupListeners(store.dispatch);
 
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;

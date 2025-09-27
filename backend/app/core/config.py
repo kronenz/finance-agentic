@@ -45,6 +45,25 @@ class Settings(BaseSettings):
     LOG_LEVEL: str = "INFO"
     ENABLE_METRICS: bool = True
     
+    # Email settings
+    SENDGRID_API_KEY: str = "your-sendgrid-api-key"
+    FROM_EMAIL: str = "noreply@example.com"
+    
+    # SMS settings
+    TWILIO_ACCOUNT_SID: str = "your-twilio-account-sid"
+    TWILIO_AUTH_TOKEN: str = "your-twilio-auth-token"
+    TWILIO_PHONE_NUMBER: str = "+1234567890"
+    
+    # Stripe settings
+    STRIPE_SECRET_KEY: str = "sk_test_your_stripe_secret_key"
+    STRIPE_PUBLISHABLE_KEY: str = "pk_test_your_stripe_publishable_key"
+    STRIPE_WEBHOOK_SECRET: str = "whsec_your_webhook_secret"
+    
+    # Binance API settings
+    BINANCE_API_KEY: str = "your_binance_api_key"
+    BINANCE_SECRET_KEY: str = "your_binance_secret_key"
+    BINANCE_TESTNET: bool = True
+    
     class Config:
         env_file = ".env"
         case_sensitive = True

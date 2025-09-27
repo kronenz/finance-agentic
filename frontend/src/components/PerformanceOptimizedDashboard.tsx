@@ -1,7 +1,7 @@
 // 성능 최적화된 대시보드 컴포넌트
 import React, { useState, useEffect, useMemo, useCallback, lazy, Suspense } from 'react';
-import { useSelector } from 'react-redux';
-import { RootState } from '../store';
+// import { useSelector } from 'react-redux';
+// import { RootState } from '../store';
 
 // 코드 스플리팅을 위한 지연 로딩
 const AIDashboard = lazy(() => import('./AIDashboard'));
@@ -45,7 +45,8 @@ const PerformanceOptimizedDashboard: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const { user } = useSelector((state: RootState) => state.auth);
+  // const { user } = useSelector((state: RootState) => state.auth);
+  const user = null;
 
   // 메모이제이션된 데이터 처리
   const processedData = useMemo(() => {

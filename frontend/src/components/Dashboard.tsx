@@ -3,13 +3,14 @@
  */
 
 import React from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { RootState } from '../store';
+import { useDispatch } from 'react-redux';
+// import { RootState } from '../store';
 import { logoutUser } from '../store/authSlice';
 import { useNavigate } from 'react-router-dom';
 
 const Dashboard: React.FC = () => {
-  const { user } = useSelector((state: RootState) => state.auth);
+  // const { user } = useSelector((state: RootState) => state.auth);
+  // const user = null;
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -33,7 +34,7 @@ const Dashboard: React.FC = () => {
             </div>
             <div className="apple-flex apple-items-center apple-gap-4 apple-animate-fade-in">
               <span className="apple-text-base apple-text-gray-7">
-                안녕하세요, <span className="apple-text-primary apple-font-semibold">{user?.first_name}</span>님!
+                안녕하세요, <span className="apple-text-primary apple-font-semibold">User</span>님!
               </span>
               <button
                 onClick={handleLogout}
@@ -75,20 +76,20 @@ const Dashboard: React.FC = () => {
                   <dl className="apple-space-y-4">
                     <div className="apple-flex apple-justify-between">
                       <dt className="apple-text-gray-7 apple-font-medium">이메일</dt>
-                      <dd className="apple-text-gray-11 apple-font-semibold">{user?.email}</dd>
+                      <dd className="apple-text-gray-11 apple-font-semibold">user@example.com</dd>
                     </div>
                     <div className="apple-flex apple-justify-between">
                       <dt className="apple-text-gray-7 apple-font-medium">이름</dt>
-                      <dd className="apple-text-gray-11 apple-font-semibold">{user?.first_name}</dd>
+                      <dd className="apple-text-gray-11 apple-font-semibold">User</dd>
                     </div>
                     <div className="apple-flex apple-justify-between">
                       <dt className="apple-text-gray-7 apple-font-medium">성</dt>
-                      <dd className="apple-text-gray-11 apple-font-semibold">{user?.last_name}</dd>
+                      <dd className="apple-text-gray-11 apple-font-semibold">Name</dd>
                     </div>
                     <div className="apple-flex apple-justify-between">
                       <dt className="apple-text-gray-7 apple-font-medium">가입일</dt>
                       <dd className="apple-text-gray-11 apple-font-semibold">
-                        {user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}
+                        {new Date().toLocaleDateString()}
                       </dd>
                     </div>
                   </dl>

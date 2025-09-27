@@ -9,9 +9,9 @@ from typing import Optional, Dict, Any, List
 from app.auth.jwt_handler import JWTHandler
 from app.auth.rbac import rbac_manager, Role, Permission
 from app.auth.dependencies import get_current_user, get_current_active_user
-from app.auth.two_factor import two_factor_auth
+# from app.auth.two_factor import two_factor_auth  # 사용하지 않음
 from app.auth.api_key import api_key_manager, APIKeyType
-from app.auth.session import session_manager
+# from app.auth.session import session_manager  # 사용하지 않음
 import logging
 
 logger = logging.getLogger(__name__)

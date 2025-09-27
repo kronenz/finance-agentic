@@ -10,7 +10,7 @@ from ...services.data_collection_service import DataCollectionService
 from ...services.data_analysis_service import DataAnalysisService
 from ...ml.models.lstm_model import LSTMModel
 from ...ml.models.xgboost_model import XGBoostModel
-from ...core.auth import get_current_user
+from ...auth.dependencies import get_current_user
 from ...core.cache import cached, cache_invalidate, CacheKeys, CacheTTL
 from ...schemas.ai import (
     AISystemStatus,
@@ -21,7 +21,9 @@ from ...schemas.ai import (
     TradingSignalRequest,
     TradingSignalResponse,
     AgentStatus,
-    SystemHealth
+    SystemHealth,
+    PortfolioRiskRequest,
+    PortfolioRiskResponse,
 )
 
 logger = structlog.get_logger()
@@ -277,6 +279,36 @@ async def _start_data_collection_background(symbols: List[str], exchanges: List[
         await data_service.start_collection(symbols, exchanges)
     except Exception as e:
         logger.error(f"Error in background data collection: {e}")
+
+@router.post("/portfolio-risk", response_model=PortfolioRiskResponse)
+async def get_portfolio_risk(
+    request: PortfolioRiskRequest,
+    current_user: dict = Depends(get_current_user)
+):
+    """포트폴리오 리스크 분석"""
+    try:
+        # TODO: Implement actual risk calculation service
+        # For now, returning mocked data
+        
+        # Deconstruct assets from request
+        assets = list(request.assets.keys())
+        
+        # Create a mocked breakdown based on request assets
+        mock_breakdown = {asset: 1.0/len(assets) for asset in assets}
+
+        return PortfolioRiskResponse(
+            value_at_risk=-0.025,  # 2.5% loss
+            sharpe_ratio=1.2,
+            max_drawdown=-0.15,  # 15% loss
+            risk_breakdown=mock_breakdown,
+        )
+    except Exception as e:
+        logger.error(f"Error calculating portfolio risk: {e}")
+        raise HTTPException(status_code=500, detail="Error calculating portfolio risk")
+
+
+@router.on_event("shutdown")
+async def shutdown_ai_services():
 
 @router.on_event("shutdown")
 async def shutdown_ai_services():

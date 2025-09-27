@@ -263,3 +263,25 @@ class AnomalyDetectionResponse(BaseModel):
     exchange: str
     anomalies: List[Anomaly]
     timestamp: str
+
+class PortfolioRiskRequest(BaseModel):
+    """포트폴리오 리스크 요청"""
+    assets: Dict[str, float] = Field(..., description="자산 심볼과 비중 맵")
+
+    class Config:
+        schema_extra = {
+            "example": {
+                "assets": {
+                    "BTCUSDT": 0.5,
+                    "ETHUSDT": 0.3,
+                    "SOLUSDT": 0.2
+                }
+            }
+        }
+
+class PortfolioRiskResponse(BaseModel):
+    """포트폴리오 리스크 응답"""
+    value_at_risk: float = Field(..., description="포트폴리오 VaR (95% 신뢰수준, 1일)")
+    sharpe_ratio: float = Field(..., description="포트폴리오 샤프 비율")
+    max_drawdown: float = Field(..., description="포트폴리오 최대 낙폭")
+    risk_breakdown: Dict[str, float] = Field(..., description="자산별 리스크 기여도")

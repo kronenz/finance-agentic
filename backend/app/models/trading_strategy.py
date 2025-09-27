@@ -1,5 +1,5 @@
 import enum
-from sqlalchemy import Column, Integer, String, Boolean, JSON, DateTime, func
+from sqlalchemy import Column, Integer, String, Boolean, JSON, DateTime, func, Enum
 from sqlalchemy.orm import relationship, validates
 from sqlalchemy.ext.declarative import declarative_base
 

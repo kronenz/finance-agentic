@@ -25,7 +25,14 @@
     "react-hook-form": "^7.43.5",
     "react-hot-toast": "^2.6.0",
     "react-redux": "^8.0.5",
-    "react-router-dom": "^6.8.1"
+    "react-router-dom": "^6.8.1",
+    "recharts": "^2.8.0",
+    "socket.io-client": "^4.7.2",
+    "framer-motion": "^10.16.4",
+    "react-query": "^3.39.3",
+    "react-window": "^1.8.8",
+    "react-virtualized-auto-sizer": "^1.0.20",
+    "zustand": "^4.4.1"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^5.16.5",

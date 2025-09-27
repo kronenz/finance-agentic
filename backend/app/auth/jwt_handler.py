@@ -2,7 +2,7 @@
 JWT 토큰 처리 및 관리
 """
 
-import jwt
+from jose import jwt
 from datetime import datetime, timedelta
 from typing import Optional, Dict, Any
 from passlib.context import CryptContext

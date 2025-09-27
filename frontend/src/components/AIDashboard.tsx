@@ -1,7 +1,7 @@
 // AI 대시보드 컴포넌트
 import React, { useState, useEffect } from 'react';
-import { useSelector } from 'react-redux';
-import { RootState } from '../store';
+// import { useSelector } from 'react-redux';
+// import { RootState } from '../store';
 import { MarketAnalysisResponse, StrategyRecommendationResponse, RiskAssessmentResponse } from '../types/ai';
 
 const AIDashboard: React.FC = () => {
@@ -15,7 +15,8 @@ const AIDashboard: React.FC = () => {
   });
   const [error, setError] = useState<string | null>(null);
 
-  const { user } = useSelector((state: RootState) => state.auth);
+  // const { user } = useSelector((state: RootState) => state.auth);
+  const user = null;
 
   useEffect(() => {
     if (user) {

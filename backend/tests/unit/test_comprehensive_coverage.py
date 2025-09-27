@@ -11,27 +11,27 @@ from datetime import datetime, timedelta
 import json
 
 # AI 에이전트 테스트
-from backend.app.ai.market_regime_detector import MarketRegimeDetector
-from backend.app.ai.vwap_analyzer import VWAPAnalyzer
-from backend.app.ai.volume_profile_analyzer import VolumeProfileAnalyzer
-from backend.app.ai.meta_controller import MetaController
-from backend.app.ai.risk_manager import RiskManager
-from backend.app.ai.rl_optimizer import RLOptimizer
-from backend.app.ai.genetic_algorithm import GeneticAlgorithm
+from app.ai.market_regime_detector import MarketRegimeDetector
+from app.ai.vwap_analyzer import VWAPAnalyzer
+from app.ai.volume_profile_analyzer import VolumeProfileAnalyzer
+from app.ai.meta_controller import MetaController
+from app.ai.risk_manager import RiskManager
+from app.ai.rl_optimizer import RLOptimizer
+from app.ai.genetic_algorithm import GeneticAlgorithm
 
 # 거래 시스템 테스트
-from backend.app.strategies.trend_following_strategy import TrendFollowingStrategy
-from backend.app.strategies.mean_reversion_strategy import MeanReversionStrategy
-from backend.app.data.market_processor import MarketDataProcessor
-from backend.app.trading.execution_engine import TradingExecutionEngine
-from backend.app.trading.position_manager import PositionManager
+from app.strategies.trend_following_strategy import TrendFollowingStrategy
+from app.strategies.mean_reversion_strategy import MeanReversionStrategy
+from app.data.market_processor import MarketDataProcessor
+from app.trading.execution_engine import TradingExecutionEngine
+from app.trading.position_manager import PositionManager
 
 # 모델 테스트
-from backend.app.models.market_regime import MarketRegime, MarketRegimeType
-from backend.app.models.trading_strategy import TradingStrategy, StrategyType
-from backend.app.models.vwap_data import VWAPData
-from backend.app.models.volume_profile import VolumeProfile
-from backend.app.models.risk_parameters import RiskParameters, RiskLevel
+from app.models.market_regime import MarketRegime, MarketRegimeType
+from app.models.trading_strategy import TradingStrategy, StrategyType
+from app.models.vwap_data import VWAPData
+from app.models.volume_profile import VolumeProfile
+from app.models.risk_parameters import RiskParameters, RiskLevel
 
 
 class TestMarketRegimeDetector(unittest.TestCase):

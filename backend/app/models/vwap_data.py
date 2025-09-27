@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, String, Float, DateTime, Index, func
-from sqlalchemy.orm import declarative_base, computed
+from sqlalchemy.orm import declarative_base
 from sqlalchemy.dialects.postgresql import ARRAY
 
 Base = declarative_base()
@@ -15,11 +15,11 @@ class VWAPData(Base):
     volume = Column(Float, nullable=False)
     price = Column(Float, nullable=False)
     
-    # Using a computed column for deviation bands for simplicity.
+    # Using regular columns for deviation bands for simplicity.
     # In a real-world scenario, this might be calculated on the fly or stored separately.
     # This example assumes a simple +/- 2% deviation band.
-    deviation_upper_band = Column(Float, computed("vwap_value * 1.02"))
-    deviation_lower_band = Column(Float, computed("vwap_value * 0.98"))
+    deviation_upper_band = Column(Float, nullable=True)
+    deviation_lower_band = Column(Float, nullable=True)
 
     __table_args__ = (
         Index('ix_vwap_data_symbol_timeframe_timestamp', 'symbol', 'timeframe', 'timestamp'),
