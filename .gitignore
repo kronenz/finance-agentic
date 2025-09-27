@@ -79,6 +79,12 @@ keys/
 *.key
 *.pem
 
+# Node.js
+node_modules/
+npm-debug.log
+yarn-error.log
+yarn.lock
+
 # Temporary files
 tmp/
 temp/

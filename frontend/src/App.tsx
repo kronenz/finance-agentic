@@ -1,28 +1,25 @@
 import React from 'react';
-import { Provider } from 'react-redux';
-import { store } from './store/store';
-import TradingDashboard from './components/trading/TradingDashboard';
-import SignalMonitoring from './components/monitoring/SignalMonitoring';
-import RiskDashboard from './components/risk/RiskDashboard';
-import VwapChart from './components/charts/VwapChart';
-import VolumeProfileChart from './components/charts/VolumeProfileChart';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import MainLayout from './layouts/MainLayout';
+import LoginPage from './pages/LoginPage';
+import DashboardPage from './pages/DashboardPage';
+import SubscriptionPage from './pages/SubscriptionPage';
+import ProfilePage from './pages/ProfilePage';
 
-const App: React.FC = () => {
+function App() {
   return (
-    <Provider store={store}>
-      <div className="bg-gray-900 min-h-screen">
-        <TradingDashboard />
-        <div className="p-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <VwapChart />
-            <VolumeProfileChart />
-          </div>
-        </div>
-        <SignalMonitoring />
-        <RiskDashboard />
-      </div>
-    </Provider>
+    <Router>
+      <Routes>
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/" element={<MainLayout />}>
+          <Route index element={<Navigate to="/dashboard" />} />
+          <Route path="dashboard" element={<DashboardPage />} />
+          <Route path="subscription" element={<SubscriptionPage />} />
+          <Route path="profile" element={<ProfilePage />} />
+        </Route>
+      </Routes>
+    </Router>
   );
-};
+}
 
 export default App;
